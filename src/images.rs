@@ -5,12 +5,16 @@ use piston_window::{
     G2d,
     DrawState,
 };
+use std::{
+    sync::Arc,
+    ops::Deref,
+};
 
-use super::game::Rect;
+use super::Rect;
 
 pub struct BackgroundImage {
     image: Image,
-    texture: Option<G2dTexture>,
+    texture: Option<Arc<G2dTexture>>,
 }
 
 impl BackgroundImage {
@@ -20,7 +24,7 @@ impl BackgroundImage {
             texture: None,
         }
     }
-    pub fn set_texture(&mut self, texture: G2dTexture) {
+    pub fn set_texture(&mut self, texture: Arc<G2dTexture>) {
         self.texture = Some(texture);
     }
     pub fn clear_texture(&mut self) {
@@ -29,7 +33,7 @@ impl BackgroundImage {
     pub fn draw(&mut self, c: Context, g: &mut G2d) {
         if let Some(ref back) = self.texture {
             self.image.draw(
-                back,
+                back.deref(),
                 &DrawState::default(),
                 c.transform,
                 g
