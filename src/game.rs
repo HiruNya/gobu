@@ -3,10 +3,16 @@ use piston_window::{
     color,
     G2d,
     context::Context,
-    Glyphs,
     G2dTexture,
     Event,
-    PistonWindow,
+    GfxFactory,
+};
+#[cfg(not(feature = "gfx_glyph_text"))]
+use ::piston_window::Glyphs;
+#[cfg(feature = "gfx_glyph_text")]
+use ::{
+    gfx_glyph::GlyphBrush,
+    gfx_device_gl::Resources,
 };
 use std::{
     collections::HashMap,
@@ -27,17 +33,25 @@ use super::{
         CharacterEntity,
     },
     script::Script,
-    util::load_characters_from_file,
+    util::{
+        load_characters_from_file,
+        load_input_from_file,
+        load_gui_from_file,
+    },
+    input::GameInput,
+    error::ImportError,
 };
 
 pub struct Game {
     pub size: Rect,
     pub ui: Ui,
     pub background: BackgroundImage,
+    pub backgrounds: HashMap<String, Arc<G2dTexture>>,
     pub stage: HashMap<String, CharacterEntity>,
     pub characters: HashMap<String, Character>,
     pub story: Script,
     pub grid: Grid,
+    pub input: GameInput,
 }
 
 impl Game {
@@ -52,10 +66,12 @@ impl Game {
             size,
             ui: Ui::new(size),
             background: BackgroundImage::new(size),
+            backgrounds: HashMap::new(),
             stage: HashMap::new(),
             characters: HashMap::new(),
             story: Script::new(),
             grid: Grid::new(1, 1, size),
+            input: GameInput::new(),
         }
     }
     pub fn handle_event(&mut self, event: &Event) {
@@ -63,27 +79,19 @@ impl Game {
         match *event {
             Input(ref i) => {
                 use piston_window::{
-                    Input::{Resize, Button},
+                    Input::Button,
                     ButtonState::Press,
                 };
                 match i {
-                    Resize(ref w, ref h) => {
-                        self.resize(*w, *h);
-                    },
-                    Button(args) if args.state == Press  => {
-                        use piston_window::Button::Mouse;
-                        match args.button {
-                            Mouse(button) => {
-                                use piston_window::MouseButton::Left;
-                                match button {
-                                    Left => {
-                                        self.next_step();
-                                        self.change_entity_state("cat entity".to_string(), "2".to_string());
-                                    },
-                                    _ => {},
-                                }
-                            },
-                            _ => {},
+                    Button(args) if args.state == Press => {
+                        use input::GameEvent;
+                        let event = self.input.handle_event(&args.button);
+                        if let Some(e) = event {
+                            match e {
+                                GameEvent::Continue => {
+                                    self.next_step();
+                                },
+                            }
                         }
                     },
                     _ => {},
@@ -92,6 +100,7 @@ impl Game {
             _ => {},
         }
     }
+    #[cfg(not(feature = "gfx_glyph_text"))]
     pub fn draw(&mut self, c: Context, g: &mut G2d, glyph_cache: &mut Glyphs) {
         clear(color::BLACK, g);
         self.background.draw(c, g);
@@ -100,8 +109,18 @@ impl Game {
         };
         self.ui.draw(c, g, glyph_cache);
     }
-    pub fn set_background(&mut self, texture: Arc<G2dTexture>) {
-        self.background.set_texture(texture);
+    #[cfg(feature = "gfx_glyph_text")]
+    pub fn draw(&mut self, c: Context, g: &mut G2d) {
+        clear(color::BLACK, g);
+        self.background.draw(c, g);
+        for character in self.stage.values() {
+            character.draw(c, g);
+        };
+        self.ui.draw(c, g);
+    }
+    #[cfg(feature = "gfx_glyph_text")]
+    pub fn draw_text(&mut self, brush: &mut GlyphBrush<Resources, GfxFactory>) {
+        self.ui.draw_text(brush)
     }
     pub fn resize(&mut self, w: u32, h: u32) {
         let rect = Rect {x: 0., y: 0., w: w as f64, h: h as f64};
@@ -111,6 +130,9 @@ impl Game {
     pub fn add_character(&mut self, name: String, character: Character) {
         self.characters.insert(name, character);
     }
+    pub fn add_background(&mut self, name: String, background: Arc<G2dTexture>) {
+        self.backgrounds.insert(name, background);
+    }
     pub fn add_to_stage(&mut self, name: String, character: String) -> bool {
         if let Some(chara) = self.characters.get(&character) {
             if let Some(c) =  chara.spawn(character) {
@@ -119,10 +141,15 @@ impl Game {
             } else {false}
         } else {false}
     }
-    pub fn change_entity_state(&mut self, name: String, state: String) -> bool {
-        if let Some(entity) = self.stage.get_mut(&name) {
+    pub fn set_background(&mut self, name: &String) {
+        if let Some(bg) = self.backgrounds.get(name) {
+            self.background.set_texture(bg.clone());
+        }
+    }
+    pub fn change_entity_state(&mut self, name: &String, state: &String) -> bool {
+        if let Some(entity) = self.stage.get_mut(name) {
             if let Some(chara) = self.characters.get(&entity.name) {
-                if let Some(state) = chara.state_map.get(&state) {
+                if let Some(state) = chara.state_map.get(state) {
                     entity.texture = state.clone();
                     true
                 } else {false}
@@ -143,10 +170,28 @@ impl Game {
     pub fn set_speaker_box(&mut self, speaker_box: TextBox) {
         self.ui.speaker_box = Some(speaker_box);
     }
-    pub fn load_characters_from_file<P: AsRef<Path>>(&mut self, path: P, window: &mut PistonWindow) -> Result<(), String> {
-        let map = load_characters_from_file(path, window)?;
+    pub fn load_characters_from_file<P: AsRef<Path>>(&mut self, path: P, factory: &mut GfxFactory)
+        -> Result<(), ImportError> {
+        let map = load_characters_from_file(path, factory)?;
         for (k, v) in map.iter() {
             self.characters.insert(k.to_string(), v.clone());
+        }
+        Ok(())
+    }
+    pub fn load_input_from_file<P: AsRef<Path>>(&mut self, path: P)
+        -> Result<(), ImportError> {
+        let mut input = load_input_from_file(path)?;
+        self.input.add_input(&mut input);
+        Ok(())
+    }
+    pub fn load_gui_from_file<P: AsRef<Path>>(&mut self, path: P)
+        -> Result<(), ImportError> {
+        let gui = load_gui_from_file(path, self)?;
+        if let Some(e) = gui.get("textbox") {
+            self.set_textbox(e.clone());
+        }
+        if let Some(e)= gui.get("speakerbox") {
+            self.set_speaker_box(e.clone());
         }
         Ok(())
     }

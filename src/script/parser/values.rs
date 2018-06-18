@@ -23,23 +23,15 @@ named!(pub pos(CompleteStr) -> (f64, f64),
     ws!(
         delimited!(
             tag!("("),
-            pair!(
-                ws!(
-                    map!(
-                        take_until!(","),
-                        |num| f64::from_str(&num).unwrap_or(0.)
-                    )
+            separated_pair!(
+                map!(
+                    take_until!(","),
+                    |num| f64::from_str(&num.trim()).unwrap_or(0.)
                 ),
-                ws!(
-                    preceded!(
-                        tag!(","),
-                        ws!(
-                            map!(
-                                take_until!(")"),
-                                |num| f64::from_str(&num).unwrap_or(0.)
-                            )
-                        )
-                    )
+                tag!(","),
+                map!(
+                    take_until!(")"),
+                    |num| f64::from_str(&num.trim()).unwrap_or(0.)
                 )
             ),
             tag!(")")
@@ -49,5 +41,5 @@ named!(pub pos(CompleteStr) -> (f64, f64),
 
 #[test]
 fn parser_value_pos() {
-    println!("{:?}", pos(CompleteStr("(5, 2)")))
+    println!("{:?}", pos(CompleteStr("( 5 , 2 )")))
 }

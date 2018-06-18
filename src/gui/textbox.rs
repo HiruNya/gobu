@@ -3,57 +3,98 @@ use piston_window::{
     Rectangle,
     context::Context,
     draw_state::DrawState,
-    Text,
+};
+#[cfg(not(feature = "gfx_glyph_text"))]
+use ::piston_window::{
     Glyphs,
+    Text,
     Transformed,
     character::CharacterCache,
 };
-
-use super::{
-    Widget,
-    Rect,
+#[cfg(feature = "gfx_glyph_text")]
+use ::{
+    gfx_glyph::{
+        Section,
+        GlyphBrush,
+        Scale,
+    },
+    gfx_device_gl::Resources,
+    piston_window::GfxFactory,
 };
+//use std::clone::Clone;
+use super::Rect;
 use game::Game;
 
+#[derive(Clone)]
 pub struct TextBox {
     pub rect: Rectangle,
-//    pub percent: Rect,
     pub inner: Rect,
     pub outer: Rect,
-    pub text: Vec<String>,
     pub text_pos: f64,
     pub padding: Padding,
-    pub changed: TextBoxChanged,
+    pub text_changed: bool,
+    // Only if we don't use the gfx_glyph crate to render text
+    #[cfg(not(feature = "gfx_glyph_text"))]
     pub text_primitive: Text,
+    #[cfg(not(feature = "gfx_glyph_text"))]
+    pub font_size: u32,
+    #[cfg(not(feature = "gfx_glyph_text"))]
+    pub text_v: Vec<String>,
+    #[cfg(not(feature = "gfx_glyph_text"))]
+    pub line_gap: u32,
+    // If we are using the gfx_glyph crate to render text
+    #[cfg(feature = "gfx_glyph_text")]
+    pub text: String,
+    #[cfg(feature = "gfx_glyph_text")]
+    pub color: [f32; 4],
+    #[cfg(feature = "gfx_glyph_text")]
+    pub font_scale: Scale,
 }
-
 impl TextBox {
+    #[cfg(not(feature = "gfx_glyph_text"))]
     pub fn new(rect: Rect) -> TextBox {
         let padding = Padding::Hv(0.025, 0.1);
         TextBox {
-//            percent: Rect {
-//                x: rect.x,
-//                y: rect.y,
-//                w: rect.w,
-//                h: rect.h,
-//            },
             outer: rect,
             inner: padding.calculate_inner_rect(rect),
             rect: Rectangle::new([0., 0., 0., 1.]),
-            text: vec![],
             text_pos: 0.,
             padding,
-            changed: TextBoxChanged::new(),
+            text_changed: false,
+            font_size: 13,
+            text_v: vec![],
+            line_gap: 7,
             text_primitive: Text::new_color([1., 1., 1., 4.], 13),
         }
     }
+    #[cfg(feature = "gfx_glyph_text")]
+    pub fn new(rect: Rect) -> TextBox {
+        let padding = Padding::Hv(0.025, 0.1);
+        let inner = padding.calculate_inner_rect(rect);
+        TextBox {
+            outer: rect,
+            inner,
+            rect: Rectangle::new([0., 0., 0., 1.]),
+            text_pos: 0.,
+            padding,
+            text_changed: false,
+            font_scale: Scale::uniform(13.),
+            text: String::new(),
+            color: [1.; 4]
+        }
+    }
+    #[cfg(not(feature = "gfx_glyph_text"))]
     pub fn set_text(&mut self, text: String) {
-        self.text = text.split('\n')
+        self.text_v = text.split('\n')
             .fold(vec![], |mut lines, l| {
                 lines.push(l.to_string());
                 lines
             });
-        self.changed.text = true;
+        self.text_changed = true;
+    }
+    #[cfg(feature = "gfx_glyph_text")]
+    pub fn set_text(&mut self, text: String) {
+        self.text = text;
     }
     fn calculate_inner(&mut self) {
         self.inner = self.padding.calculate_inner_rect(self.outer);
@@ -69,23 +110,22 @@ impl TextBox {
 //        self.inner = self.padding.calculate_inner_rect(outer_rect);
 //        self.position_text();
 //    }
+    #[cfg(not(feature = "gfx_glyph_text"))]
     fn position_text(&mut self) {
-        let y = {
-            let font_size = 13;
-            self.inner.y + (font_size as f64)
-        };
+        let y = self.inner.y + (self.font_size as f64);
         self.text_pos = y;
     }
     // Pretty much copied from ggez
+    #[cfg(not(feature = "gfx_glyph_text"))]
     fn wrap_text(&mut self, cache: &mut Glyphs) {
         let mut new_text = Vec::new();
-        for line in self.text.iter() {
+        for line in self.text_v.iter() {
             let mut current_line = String::new();
             for word in line.split_whitespace() {
                 let mut possible_line = current_line.clone();
                 if !possible_line.is_empty() { possible_line.push(' ') };
                 possible_line.push_str(word);
-                let text_width = match cache.width(13, possible_line.as_str()) {
+                let text_width = match cache.width(self.font_size, possible_line.as_str()) {
                     Ok(e) => e,
                     Err(_) => 100.,
                 };
@@ -100,12 +140,10 @@ impl TextBox {
                 new_text.push(current_line);
             }
         }
-        self.text = new_text;
+        self.text_v = new_text;
     }
-}
-
-impl Widget for TextBox {
-    fn draw(&mut self, c: Context, g: &mut G2d, glyph_cache: &mut Glyphs) {
+    #[cfg(not(feature = "gfx_glyph_text"))]
+    pub fn draw(&mut self, c: Context, g: &mut G2d, glyph_cache: &mut Glyphs) {
         self.rect
             .draw(
                 [
@@ -118,30 +156,65 @@ impl Widget for TextBox {
                 c.transform,
                 g,
             );
-        if self.changed.text {
+        if self.text_changed {
             self.wrap_text(glyph_cache);
             self.position_text();
-            self.changed.text = false;
+            self.text_changed = false;
         }
-        for (i, l) in self.text.iter().enumerate() {
-            Text::new_color([1.; 4], 13)
+        for (i, l) in self.text_v.iter().enumerate() {
+            self.text_primitive
                 .draw(
                     l.as_str(),
                     glyph_cache,
                     &DrawState::default(),
-                    c.transform.trans(self.inner.x, self.text_pos + (20 * i) as f64),
+                    c.transform.trans(self.inner.x, self.text_pos + ((self.font_size + self.line_gap) * i as u32) as f64),
                     g,
                 ).expect("Panicked when drawing text!");
         };
     }
+    #[cfg(feature = "gfx_glyph_text")]
+    pub fn draw(&self, c: Context, g: &mut G2d) {
+        self.rect
+            .draw(
+                [
+                    self.outer.x,
+                    self.outer.y,
+                    self.outer.w,
+                    self.outer.h
+                ],
+                &DrawState::default(),
+                c.transform,
+                g,
+            );
+//        if self.text_changed {
+//            self.wrap_text(glyph_cache);
+//            self.position_text();
+//            self.text_changed = false;
+//        }
+    }
+    #[cfg(feature = "gfx_glyph_text")]
+    pub fn draw_text(&self, brush: &mut GlyphBrush<Resources, GfxFactory>) {
+        let section = Section {
+            text: &self.text,
+            bounds: (self.inner.w as f32, self.inner.h as f32),
+            color: self.color,
+            screen_position: (self.inner.x as f32, self.inner.y as f32),
+            scale: self.font_scale,
+            ..Section::default()
+        };
+        brush.queue(section);
+    }
 }
 
+#[derive(Clone, Debug, Deserialize)]
 pub struct TextBoxBuilder {
     rectangle_colour: Option<[f32; 4]>,
     text_colour: Option<[f32; 4]>,
     font_size: Option<u32>,
     rectangle: Option<Rect>,
     padding: Option<Padding>,
+    #[cfg(not(feature = "gfx_glyph_text"))]
+    line_gap: Option<u32>
 }
 impl TextBoxBuilder {
     pub fn new() -> TextBoxBuilder {
@@ -151,8 +224,11 @@ impl TextBoxBuilder {
             font_size: None,
             rectangle: None,
             padding: None,
+            #[cfg(not(feature = "gfx_glyph_text"))]
+            line_gap: None,
         }
     }
+    #[cfg(not(feature = "gfx_glyph_text"))]
     pub fn build(self, game: &Game) -> TextBox {
         let rect = self.rectangle.unwrap_or( Rect{x: 0., y: 0., w: 0., h: 0.} );
         let mut text_box = TextBox::new(game.grid.get_abs_rect(rect));
@@ -161,12 +237,37 @@ impl TextBoxBuilder {
             self.font_size.unwrap_or(13)
         );
         text_box.text_primitive = text_prim;
+        if let Some(gap) = self.line_gap {
+            text_box.line_gap = gap;
+        }
         if let Some(col) = self.rectangle_colour {
             text_box.rect = Rectangle::new(col);
         };
         if let Some(pad) = self.padding {
             text_box.padding = pad;
             text_box.calculate_inner();
+        }
+        if let Some(size) = self.font_size {
+            text_box.font_size = size;
+        }
+        text_box
+    }
+    #[cfg(feature = "gfx_glyph_text")]
+    pub fn build(self, game: &Game) -> TextBox {
+        let rect = self.rectangle.unwrap_or( Rect{x: 0., y: 0., w: 0., h: 0.} );
+        let mut text_box = TextBox::new(game.grid.get_abs_rect(rect));
+        if let Some(col) = self.rectangle_colour {
+            text_box.rect = Rectangle::new(col);
+        };
+        if let Some(pad) = self.padding {
+            text_box.padding = pad;
+            text_box.calculate_inner();
+        }
+        if let Some(size) = self.font_size {
+            text_box.font_scale = Scale::uniform(size as f32);
+        }
+        if let Some(col) = self.text_colour {
+            text_box.color = col;
         }
         text_box
     }
@@ -190,9 +291,16 @@ impl TextBoxBuilder {
         self.padding = Some(pad);
         self
     }
+    #[cfg(not(feature = "gfx_glyph_text"))]
+    pub fn with_line_gap(mut self, gap: u32) -> Self {
+        self.line_gap = Some(gap);
+        self
+    }
 
 }
 
+#[derive(Clone, Debug, Deserialize)]
+#[serde(untagged)]
 pub enum Padding {
     All(f64),
     Hv(f64, f64),
@@ -229,22 +337,6 @@ impl Padding {
                 }
             }
             None => outer_rect,
-        }
-    }
-}
-
-pub struct TextBoxChanged {
-    pub pos: bool,
-    pub size: bool,
-    pub text: bool,
-}
-
-impl TextBoxChanged {
-    fn new() -> TextBoxChanged {
-        TextBoxChanged {
-            pos: true,
-            size: true,
-            text: true,
         }
     }
 }

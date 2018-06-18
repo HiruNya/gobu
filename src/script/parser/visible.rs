@@ -6,11 +6,28 @@ use super::{
 
 named!(pub show(CompleteStr) -> ScriptStep,
     map!(
-        preceded!(
-            tag!("SHOW"),
-            quote
+        pair!(
+            preceded!(
+                tag!("SHOW"),
+                quote
+            ),
+            opt!(
+                ws!(
+                    preceded!(
+                        tag!("~"),
+                        quote
+                    )
+                )
+            )
         ),
-        |image| ScriptStep::Show(image.to_string())
+        |(image, state)| {
+            let state = {
+                if let Some(s) = state {
+                    Some(s.to_string())
+                } else {None}
+            };
+            ScriptStep::Show(image.to_string(), state)
+        }
     )
 );
 
@@ -25,7 +42,8 @@ named!(pub hide(CompleteStr) -> ScriptStep,
 );
 
 #[test]
-pub fn visible() {
+pub fn test_parser_visible() {
     println!("{:?}", show(CompleteStr("SHOW 'cat girl'")));
+    println!("{:?}", show(CompleteStr("SHOW 'cat girl'~'second'")));
     println!("{:?}", hide(CompleteStr("HIDE 'cat girl'")));
 }

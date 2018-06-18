@@ -9,3 +9,9 @@ nom = "4"
 serde = "1"
 serde_derive = "1"
 toml = "0.4"
+indexmap = "1"
+gfx_device_gl = "*"
+gfx_glyph = { version = "0.11", optional = true }
+
+[features]
+gfx_glyph_text = ["gfx_glyph"]

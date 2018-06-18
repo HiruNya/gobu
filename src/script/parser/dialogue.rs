@@ -33,7 +33,7 @@ named!(pub dialogue(CompleteStr) -> ScriptStep,
 );
 
 #[test]
-pub fn test_dialogue() {
+fn test_dialogue() {
     println!("{:?}", dialogue_continue(CompleteStr("\"hi there\"")));
     println!("{:?}", dialogue(CompleteStr(r#""Main Character" : "Hi there""#)))
 }
