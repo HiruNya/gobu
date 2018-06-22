@@ -1,16 +1,17 @@
 mod event;
 
+use std::collections::HashSet;
 use piston_window::Button;
 pub use self::event::GameEvent;
 
 #[derive(Debug)]
 pub struct GameInput {
-    pub continue_: Vec<Button>
+    pub continue_: HashSet<Button>
 }
 impl GameInput {
     pub fn new() -> Self {
         GameInput {
-            continue_: Vec::new(),
+            continue_: HashSet::new(),
         }
     }
     pub fn handle_event(&self, button: &Button) -> Option<GameEvent> {
@@ -18,13 +19,13 @@ impl GameInput {
         None
     }
     pub fn add_continue_event(&mut self, button: Button) {
-        self.continue_.push(button);
+        self.continue_.insert(button);
     }
-    pub fn add_continue_events(&mut self, buttons: &mut Vec<Button>) {
-        self.continue_.append(buttons);
+    pub fn add_continue_events(&mut self, buttons: HashSet<Button>) {
+        self.continue_.extend(buttons);
     }
-    pub fn add_input(&mut self, input: &mut GameInput) {
-        self.add_continue_events(&mut input.continue_);
+    pub fn add_input(&mut self, input: GameInput) {
+        self.add_continue_events(input.continue_);
     }
 }
 

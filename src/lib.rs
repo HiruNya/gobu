@@ -17,7 +17,7 @@ pub mod input;
 pub mod error;
 
 pub use game::*;
-pub use character::Character;
+pub use util::GameBuilder;
 
 #[cfg(test)]
 mod tests {}

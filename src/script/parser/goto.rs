@@ -1,4 +1,7 @@
-use nom::types::CompleteStr;
+use nom::{
+    alphanumeric,
+    types::CompleteStr,
+};
 use super::super::ScriptStep;
 
 named!(pub goto(CompleteStr) -> ScriptStep,
@@ -8,11 +11,11 @@ named!(pub goto(CompleteStr) -> ScriptStep,
             ws!(
                 separated_pair!(
                     opt!(
-                        take_until!(":")
+                        alphanumeric
                     ),
                     tag!(":"),
                     opt!(
-                        take_until_either!(" \r\n")
+                        alphanumeric
                     )
                 )
             )
@@ -35,7 +38,7 @@ named!(pub goto(CompleteStr) -> ScriptStep,
 
 #[test]
 fn test_parser_goto() {
-    println!("{:?}", goto(CompleteStr(r#"-> name:anchor "#)));
-    println!("{:?}", goto(CompleteStr(r#"-> name: "#)));
-    println!("{:?}", goto(CompleteStr(r#"-> :anchor "#)));
+    println!("{:?}", goto(CompleteStr(r#"-> name:anchor"#)));
+    println!("{:?}", goto(CompleteStr(r#"-> name:"#)));
+    println!("{:?}", goto(CompleteStr(r#"-> :anchor"#)));
 }

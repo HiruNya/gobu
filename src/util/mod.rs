@@ -1,13 +1,20 @@
-mod load;
+pub mod load;
+mod game_builder;
 #[cfg(feature = "gfx_glyph_text")]
 pub mod gfx_glyph;
 
 pub use self::{
     load::{
-        character::load_characters_from_file,
-        input::load_input_from_file,
-        gui::load_gui_from_file,
-    }
+        load_characters_from_file,
+        load_input_from_file,
+        load_gui_from_file,
+        load_backgrounds_from_file,
+        load_scripts_from_file,
+    },
+    game_builder::{
+        GameBuilder,
+        ExtFile,
+    },
 };
 
 #[cfg(feature = "gfx_glyph_text")]

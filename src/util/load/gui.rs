@@ -5,7 +5,7 @@ use std::{
     io::Read,
 };
 use super::super::super::{
-    error::ImportError,
+    error::ConfigImportError,
     gui::textbox::{
         TextBox,
         TextBoxBuilder,
@@ -15,14 +15,14 @@ use super::super::super::{
 use toml::from_str;
 
 pub fn load_gui_from_file<P: AsRef<Path>>(path: P, game: &Game)
-    -> Result<HashMap<String, TextBox>, ImportError> {
+    -> Result<HashMap<String, TextBox>, ConfigImportError> {
     let mut buffer = String::new();
     File::open(path)?.read_to_string(&mut buffer)?;
     load_gui_from_str(&buffer, game)
 }
 
-fn load_gui_from_str(text: &str, game: &Game)
-    -> Result<HashMap<String, TextBox>, ImportError> {
+pub fn load_gui_from_str(text: &str, game: &Game)
+    -> Result<HashMap<String, TextBox>, ConfigImportError> {
     let map: HashMap<String, TextBoxBuilder> = from_str(text)?;
     Ok(load_gui_from_hashmap(map, game))
 }

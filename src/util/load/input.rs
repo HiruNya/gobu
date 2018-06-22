@@ -2,7 +2,10 @@ use std::{
     path::Path,
     fs::File,
     io::Read,
-    collections::HashMap,
+    collections::{
+        HashMap,
+        HashSet,
+    },
 };
 use toml::from_str;
 use piston_window::{
@@ -12,24 +15,24 @@ use piston_window::{
 };
 use super::super::super::{
     input::GameInput,
-    error::ImportError,
+    error::ConfigImportError,
 };
 
 pub fn load_input_from_file<P: AsRef<Path>>(path: P)
-    -> Result<GameInput, ImportError> {
+    -> Result<GameInput, ConfigImportError> {
     let mut buffer = String::new();
     File::open(path)?.read_to_string(&mut buffer)?;
     load_input_from_str(&buffer)
 }
 
-fn load_input_from_str(text: &str)
-    -> Result<GameInput, ImportError> {
+pub fn load_input_from_str(text: &str)
+    -> Result<GameInput, ConfigImportError> {
     let map: HashMap<String, Vec<InputFromFile>> = from_str(text)?;
     let mut cont = None;
     for (k, v) in map.iter() {
         match k.to_lowercase().as_str() {
             "continue" => {
-                let list: Vec<Button> = v
+                let list: HashSet<Button> = v
                     .iter()
                     .map(|item| item.to_button())
                     .collect();
@@ -39,7 +42,7 @@ fn load_input_from_str(text: &str)
         }
     }
     Ok(GameInput {
-        continue_: cont.unwrap_or(Vec::new()).clone()
+        continue_: cont.unwrap_or(HashSet::new()).clone()
     })
 }
 

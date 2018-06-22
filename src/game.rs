@@ -37,9 +37,22 @@ use super::{
         load_characters_from_file,
         load_input_from_file,
         load_gui_from_file,
+        load_backgrounds_from_file,
+        load_scripts_from_file,
+        load::{
+            load_input_from_str,
+            load_characters_from_str,
+            load_gui_from_str,
+            load_backgrounds_from_str,
+            load_scripts_from_str,
+            script::ScriptsFromFile,
+        },
     },
     input::GameInput,
-    error::ImportError,
+    error::{
+        ConfigImportError,
+        ScriptConfigImportError,
+    },
 };
 
 pub struct Game {
@@ -171,28 +184,78 @@ impl Game {
         self.ui.speaker_box = Some(speaker_box);
     }
     pub fn load_characters_from_file<P: AsRef<Path>>(&mut self, path: P, factory: &mut GfxFactory)
-        -> Result<(), ImportError> {
+        -> Result<(), ConfigImportError> {
         let map = load_characters_from_file(path, factory)?;
+        Ok(self.load_characters(map))
+    }
+    pub fn load_characters_from_str(&mut self, text: &str, factory: &mut GfxFactory) -> Result<(), ConfigImportError> {
+        let map = load_characters_from_str(text, factory)?;
+        Ok(self.load_characters(map))
+    }
+    fn load_characters(&mut self, map: HashMap<String, Character>) {
         for (k, v) in map.iter() {
             self.characters.insert(k.to_string(), v.clone());
         }
-        Ok(())
     }
     pub fn load_input_from_file<P: AsRef<Path>>(&mut self, path: P)
-        -> Result<(), ImportError> {
-        let mut input = load_input_from_file(path)?;
-        self.input.add_input(&mut input);
+        -> Result<(), ConfigImportError> {
+        let input = load_input_from_file(path)?;
+        self.input.add_input(input);
+        Ok(())
+    }
+    pub fn load_input_from_str(&mut self, text: &str)
+        -> Result<(), ConfigImportError> {
+        let input = load_input_from_str(text)?;
+        self.input.add_input(input);
         Ok(())
     }
     pub fn load_gui_from_file<P: AsRef<Path>>(&mut self, path: P)
-        -> Result<(), ImportError> {
+        -> Result<(), ConfigImportError> {
         let gui = load_gui_from_file(path, self)?;
+        self.load_gui(gui);
+        Ok(())
+    }
+    pub fn load_gui_from_str(&mut self, text: &str)
+        -> Result<(), ConfigImportError> {
+        let gui = load_gui_from_str(text, self)?;
+        self.load_gui(gui);
+        Ok(())
+    }
+    fn load_gui(&mut self, gui: HashMap<String, TextBox>) {
         if let Some(e) = gui.get("textbox") {
             self.set_textbox(e.clone());
         }
         if let Some(e)= gui.get("speakerbox") {
             self.set_speaker_box(e.clone());
         }
-        Ok(())
+    }
+    pub fn load_backgrounds_from_file<P: AsRef<Path>>(&mut self, path: P, factory: &mut GfxFactory)
+        -> Result<(), ConfigImportError> {
+        let bgs = load_backgrounds_from_file(path, factory)?;
+        Ok(self.load_backgrounds(bgs))
+    }
+    pub fn load_backgrounds_from_str(&mut self, text: &str, factory: &mut GfxFactory)
+        -> Result<(), ConfigImportError> {
+        let bgs = load_backgrounds_from_str(text, factory)?;
+        Ok(self.load_backgrounds(bgs))
+    }
+    fn load_backgrounds(&mut self, map: HashMap<String, Arc<G2dTexture>>) {
+        self.backgrounds.extend(map);
+    }
+    pub fn load_scripts_from_file<P: AsRef<Path>>(&mut self, path: P)
+        -> Result<(), ScriptConfigImportError> {
+        let scripts = load_scripts_from_file(path)?;
+        Ok(self.load_scripts(scripts))
+    }
+    pub fn load_scripts_from_str(&mut self, text: &str)
+        -> Result<(), ScriptConfigImportError> {
+        let scripts = load_scripts_from_str(text)?;
+        Ok(self.load_scripts(scripts))
+    }
+    fn load_scripts(&mut self, file: ScriptsFromFile) {
+        self.story.load_scripts(file.map.clone());
+        if let Some(e) = file.default {
+            self.story.set_script(&e, None);
+        }
     }
 }

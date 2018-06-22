@@ -10,14 +10,16 @@ use gfx_glyph::GlyphBrush;
 use gfx_device_gl::Resources;
 
 pub trait GfxGlyph {
-    fn draw_2d_with_text<E, F, U>(&mut self, e: &E, brush: &mut GlyphBrush<Resources, GfxFactory>, f: F) -> Option<U> where
+    fn draw_2d_with_text<E, F, U>(&mut self, e: &E, brush: &mut GlyphBrush<Resources, GfxFactory>, f: F)
+        -> Result<Option<U>, String> where
         E: GenericEvent,
         F: FnOnce(Context, &mut G2d) -> U;
 }
 
 impl GfxGlyph for PistonWindow {
     // Mostly copied from piston_window however I added support for Gfx_glyph
-    fn draw_2d_with_text<E, F, U>(&mut self, e: &E, brush: &mut GlyphBrush<Resources, GfxFactory>, f: F) -> Option<U> where
+    fn draw_2d_with_text<E, F, U>(&mut self, e: &E, brush: &mut GlyphBrush<Resources, GfxFactory>, f: F)
+        -> Result<Option<U>, String> where
         E: GenericEvent,
         F: FnOnce(Context, &mut G2d) -> U
     {
@@ -34,11 +36,11 @@ impl GfxGlyph for PistonWindow {
                 &mut self.encoder,
                 &self.output_color,
                 &self.output_stencil
-            );
+            )?;
             self.encoder.flush(&mut self.device);
-            Some(res)
+            Ok(Some(res))
         } else {
-            None
+            Ok(None)
         }
     }
 }

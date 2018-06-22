@@ -30,9 +30,9 @@ pub enum ScriptStep {
 
 pub struct Script {
     step: usize,
-    script: Vec<ScriptStep>,
-    scripts: IndexMap<String, IndexMap<String, Vec<ScriptStep>>>,
-    index: (usize, usize),
+    pub script: Vec<ScriptStep>,
+    pub scripts: IndexMap<String, IndexMap<String, Vec<ScriptStep>>>,
+    pub index: (usize, usize),
 }
 impl Script {
     pub fn new() -> Script {
@@ -90,11 +90,13 @@ impl Script {
     pub fn load_script(&mut self, name: String, scripts: IndexMap<String, Vec<ScriptStep>>) {
         self.scripts.insert(name, scripts);
     }
-    pub fn load_scripts(&mut self, name: String, map: IndexMap<String, Vec<ScriptStep>>) {
-        self.load_script(name, map);
+    pub fn load_scripts(&mut self, map: IndexMap<String, IndexMap<String, Vec<ScriptStep>>>) {
+        for (k, v) in map.iter() {
+            self.load_script(k.to_string(), v.clone());
+        }
     }
     pub fn load_from_str(&mut self, name: String, content: &str) -> Result<(), ScriptImportError> {
-        self.load_scripts(name, translate(content)?);
+        self.load_script(name, translate(content)?);
         Ok(())
     }
     pub fn load_from_file<P: AsRef<Path>>(&mut self, name: String, path: P) -> Result<(), ScriptImportError> {
@@ -107,7 +109,8 @@ impl Script {
 impl Game {
     pub fn next_step(&mut self) {
         let length = self.story.script.len();
-        loop {
+        let mut execute = true;
+        while execute {
             if self.story.step < length {
                 self.story.step += 1;
                 let possible_step;
@@ -115,75 +118,89 @@ impl Game {
                     possible_step = self.story.script.get(self.story.step - 1).cloned()
                 }
                 if let Some(step) = possible_step {
-                    use self::ScriptStep::*;
-                    match step {
-                        Dialogue(speaker, content) => {
-                            self.ui.textbox.set_text(content.clone());
-                            if let Some(ref mut e) = self.ui.speaker_box {
-                                e.set_text(speaker.to_string());
-                            }
-                            break
-                        },
-                        DialogueContinue(content) => {
-                            self.ui.textbox.set_text(content.clone());
-                            break
-                        },
-                        Show(image, possible_state) => {
-                            if let Some(e) = self.stage.get_mut(&image) {
-                                e.visible = true;
-                            }
-                            if let Some(state) = possible_state {
-                                self.change_entity_state(&image, &state);
-                            }
-                        },
-                        Hide(image) => {
-                            if let Some(e) = self.stage.get_mut(&image) {
-                                e.visible = false;
-                            };
-                        },
-                        Spawn(character, entity, maybe_pos) => {
-                            let name = entity.clone().unwrap_or(character.clone());
-                            self.add_to_stage(name.clone(), character.clone());
-                            if let Some(pos) = maybe_pos {
-                                self.move_character(&name, pos.into())
-                            }
-                        },
-                        Kill(name) => {
-                            self.stage.remove(&name);
-                        },
-                        Move(name, pos) => {
-                            self.move_character(&name, pos.into());
-                        },
-                        Stage(bg) => {
-                            self.set_background(&bg);
-                        },
-                        GoTo(name, anchor) => {
-                            let name = {
-                                if let Some(n) = name {
-                                    n
-                                } else {
-                                    if let Some((k, _)) = self.story.scripts.get_index(self.story.index.0) {
-                                        k.to_string()
-                                    } else {
-                                        String::new()
-                                    }
-                                }
-                            };
-                            self.story.set_script(&name, anchor);
-                            self.next_step()
-                        },
-                        End => {
-                            self.story.step -= 1;
-                            break;
-                        }
-                    }
+                    execute = self.execute_step(step);
                 } else {
                     self.story.next_script();
+                    self.next_step();
                     break
                 }
             } else {
                 self.story.next_script();
+                self.next_step();
                 break
+            }
+        }
+    }
+    fn execute_step(&mut self, step: ScriptStep) -> bool {
+        // boolean value is whether to continue or not.
+        // True => Continue
+        // False => Stop
+        use self::ScriptStep::*;
+        match step {
+            Dialogue(speaker, content) => {
+                self.ui.textbox.set_text(content.clone());
+                if let Some(ref mut e) = self.ui.speaker_box {
+                    e.set_text(speaker.to_string());
+                }
+                false
+            },
+            DialogueContinue(content) => {
+                self.ui.textbox.set_text(content.clone());
+                false
+            },
+            Show(image, possible_state) => {
+                if let Some(e) = self.stage.get_mut(&image) {
+                    e.visible = true;
+                }
+                if let Some(state) = possible_state {
+                    self.change_entity_state(&image, &state);
+                }
+                true
+            },
+            Hide(image) => {
+                if let Some(e) = self.stage.get_mut(&image) {
+                    e.visible = false;
+                }
+                true
+            },
+            Spawn(character, entity, maybe_pos) => {
+                let name = entity.clone().unwrap_or(character.clone());
+                self.add_to_stage(name.clone(), character.clone());
+                if let Some(pos) = maybe_pos {
+                    self.move_character(&name, pos.into());
+                }
+                true
+            },
+            Kill(name) => {
+                self.stage.remove(&name);
+                true
+            },
+            Move(name, pos) => {
+                self.move_character(&name, pos.into());
+                true
+            },
+            Stage(bg) => {
+                self.set_background(&bg);
+                true
+            },
+            GoTo(name, anchor) => {
+                let name = {
+                    if let Some(n) = name {
+                        n
+                    } else {
+                        if let Some((k, _)) = self.story.scripts.get_index(self.story.index.0) {
+                            k.to_string()
+                        } else {
+                            String::new()
+                        }
+                    }
+                };
+                self.story.set_script(&name, anchor);
+                true
+            },
+            End => {
+                self.story.step -= 1;
+                false
             }
         }
     }

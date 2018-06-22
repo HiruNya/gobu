@@ -8,7 +8,7 @@ use toml::from_str;
 use super::super::super::{
     Pos,
     character::Character,
-    error::ImportError,
+    error::ConfigImportError,
 };
 use piston_window::GfxFactory;
 use super::load::load_character_images;
@@ -18,14 +18,14 @@ pub type ParsedCharactersHashmap = HashMap<String, CharacterFromFile>;
 pub type CharacterHashmap = HashMap<String, Character>;
 
 pub fn load_characters_from_file<P: AsRef<Path>>(path: P, window: &mut GfxFactory)
-    -> Result<CharacterHashmap, ImportError> {
+    -> Result<CharacterHashmap, ConfigImportError> {
     let mut buffer = String::new();
     File::open(path)?.read_to_string(&mut buffer)?;
     load_characters_from_str(&buffer, window)
 }
 
-fn load_characters_from_str(text: &str, factory: &mut GfxFactory)
-    -> Result<CharacterHashmap, ImportError> {
+pub fn load_characters_from_str(text: &str, factory: &mut GfxFactory)
+    -> Result<CharacterHashmap, ConfigImportError> {
     let map: HashMap<String,
             HashMap<String, ValueType>> = from_str(text)?;
     Ok(raw_hashmap_to_characters(map, factory))
