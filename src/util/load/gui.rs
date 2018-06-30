@@ -14,6 +14,7 @@ use super::super::super::{
 };
 use toml::from_str;
 
+/// Load the GUI from a TOML file
 pub fn load_gui_from_file<P: AsRef<Path>>(path: P, game: &Game)
     -> Result<HashMap<String, TextBox>, ConfigImportError> {
     let mut buffer = String::new();
@@ -21,6 +22,7 @@ pub fn load_gui_from_file<P: AsRef<Path>>(path: P, game: &Game)
     load_gui_from_str(&buffer, game)
 }
 
+/// Load the GUI from a TOML str
 pub fn load_gui_from_str(text: &str, game: &Game)
     -> Result<HashMap<String, TextBox>, ConfigImportError> {
     let map: HashMap<String, TextBoxBuilder> = from_str(text)?;

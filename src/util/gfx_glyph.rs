@@ -1,3 +1,21 @@
+//! A trait that implements the draw_2d_with_text function onto PistonWindow.
+//!
+//! This is used only if you want to use the ``gfx_glyph`` crate. This trait should
+//! be imported for the corresponding function implemented for PistonWindow to also
+//! be imported.
+//!
+//! E.g.
+//! ```rust, no_run
+//! use svnf::util::GfxGlyph;
+//! // ...
+//! window.draw_2d_with_text(&event, &mut brush, ||{
+//!     &game.draw(c, g);
+//! });
+//! ```
+//!
+//! This would draw the text over all the things draw in the closure.
+//! This, however, might cause problems if things are overlapping.
+
 use piston_window::{
     PistonWindow,
     G2d,
@@ -44,45 +62,3 @@ impl GfxGlyph for PistonWindow {
         }
     }
 }
-//
-//trait GfxGlyph2 {
-//    fn draw_with_text<C, F, U>(
-//        &mut self,
-//        encoder: &mut gfx::Encoder<R, C>,
-//        output_color: &gfx::handle::RenderTargetView<R, Srgba8>,
-//        output_stencil: &gfx::handle::DepthStencilView<R, DepthStencil>,
-//        viewport: Viewport,
-//        f: F,
-//        brush: &mut GlyphBrush<Resources, GfxFactory>
-//    ) -> U
-//        where C: gfx::CommandBuffer<R>,
-//              F: FnOnce(Context, &mut GfxGraphics<R, C>, &mut GlyphBrush<Resources, GfxFactory>) -> U;
-//}
-//
-//impl<R: gfx::Resources> GfxGlyph2 for Gfx2d<R> {
-//    fn draw_with_text<C, F, U>(
-//        &mut self,
-//        encoder: &mut gfx::Encoder<R, C>,
-//        output_color: &gfx::handle::RenderTargetView<R, Srgba8>,
-//        output_stencil: &gfx::handle::DepthStencilView<R, DepthStencil>,
-//        viewport: Viewport,
-//        f: F,
-//        brush: &mut GlyphBrush<Resources, GfxFactory>
-//    ) -> U
-//        where C: gfx::CommandBuffer<R>,
-//              F: FnOnce(Context, &mut GfxGraphics<R, C>, &mut GlyphBrush<Resources, GfxFactory>) -> U
-//    {
-//        let ref mut g = GfxGraphics::new(
-//            encoder,
-//            output_color,
-//            output_stencil,
-//            self
-//        );
-//        let c = Context::new_viewport(viewport);
-//        let res = f(c, g, brush);
-//        if g.g2d.colored_offset > 0 {
-//            g.flush_colored();
-//        }
-//        res
-//    }
-//}

@@ -1,3 +1,13 @@
+//! Manages the story of the VN and also parsing script files.
+//!
+//! Script files a just text files that have commands which causes:
+//! * Dialogue to change
+//! * Characters to be spawned, killed, shown, and hidden
+//! * The background to change
+//!
+//! See the example_vn repo's script.txt file for an example of what can be done
+//! with this language.
+
 pub mod parser;
 
 use std::{
@@ -14,27 +24,49 @@ use super::{
 };
 use self::parser::translate;
 
+/// Represents an action dictated by the script
 #[derive(Debug, Clone)]
 pub enum ScriptStep {
+    /// A dialogue that consists of the name of the speaker and the text.
+    /// (Name, Text)
     Dialogue(String, String),
+    /// Only changes the text in the textbox. Doesn't change the speaker.
     DialogueContinue(String),
+    /// Shows an entity on the screen and if the state is not ``None`` will change that
+    /// entity's state to the state named.
+    /// (Entity, Some(State))
     Show(String, Option<String>), // Show(Entity, State)
+    /// Hides an entity using its name
     Hide(String),
+    /// Spawns a character with a specific entity name and also possibly a position.
+    /// (CharacterName, Some(EntityName), Some(Position))
     Spawn(String, Option<String>, Option<(f64, f64)>),
+    /// Kill an entity
     Kill(String),
+    /// Move an entity to a specific position
     Move(String, (f64, f64)),
+    /// Set the background
     Stage(String),
+    /// Go to a specific script or part of a script
+    /// (ScriptName, AnchorName)
     GoTo(Option<String>, Option<String>),
+    /// End of the script/game
     End,
 }
 
+/// The struct in charge of the story in the VN and also in charge of parsing everything.
 pub struct Script {
+    /// The current position in the script.
     step: usize,
+    /// The current script that is being used.
     pub script: Vec<ScriptStep>,
+    /// A collection of all the scripts that can be used.
     pub scripts: IndexMap<String, IndexMap<String, Vec<ScriptStep>>>,
+    /// The current index of what script is being used and what anchor is being used.
     pub index: (usize, usize),
 }
 impl Script {
+    /// Create a new ``Script`` struct.
     pub fn new() -> Script {
         Script {
             step: 0,
@@ -46,6 +78,7 @@ impl Script {
 //    pub fn add_step(&mut self, step: ScriptStep) {
 //        self.script.push(step)
 //    }
+    /// Set a script with its name and maybe its anchor.
     pub fn set_script(&mut self, name: &str, anchor: Option<String>) {
         let mut index = self.index;
         self.script = match self.scripts.get_full(name) {
@@ -76,6 +109,7 @@ impl Script {
         self.step = 0;
         self.index = index;
     }
+    /// Go to the next script.
     pub fn next_script(&mut self) {
         if let Some((_, map)) = self.scripts.get_index(self.index.0) {
             self.index.1 += 1;
@@ -87,18 +121,22 @@ impl Script {
             }
         }
     }
+    /// Load a script into the collection of scripts.
     pub fn load_script(&mut self, name: String, scripts: IndexMap<String, Vec<ScriptStep>>) {
         self.scripts.insert(name, scripts);
     }
+    /// Load a number of scripts into the collection of scripts.
     pub fn load_scripts(&mut self, map: IndexMap<String, IndexMap<String, Vec<ScriptStep>>>) {
         for (k, v) in map.iter() {
             self.load_script(k.to_string(), v.clone());
         }
     }
+    /// Load scripts from a ``str``.
     pub fn load_from_str(&mut self, name: String, content: &str) -> Result<(), ScriptImportError> {
         self.load_script(name, translate(content)?);
         Ok(())
     }
+    /// Load scripts from an external file.
     pub fn load_from_file<P: AsRef<Path>>(&mut self, name: String, path: P) -> Result<(), ScriptImportError> {
         let mut buffer = String::new();
         File::open(path)?.read_to_string(&mut buffer)?;
@@ -107,6 +145,7 @@ impl Script {
 }
 
 impl Game {
+    /// Load the next step of the script and execute the step.
     pub fn next_step(&mut self) {
         let length = self.story.script.len();
         let mut execute = true;

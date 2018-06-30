@@ -6,16 +6,26 @@ use piston_window::GfxFactory;
 
 type MaybeFile = Option<ExtFile>;
 
+/// The struct that is used to build a ``Game`` struct.
 pub struct GameBuilder {
+    /// The size of the window.
+    /// [w, h]
     size: [f64; 2],
+    /// The path or string to a GUI config file.
     gui: MaybeFile,
+    /// The path or string to a Background config file.
     backgrounds: MaybeFile,
+    /// The path or string to a Character config file.
     characters: MaybeFile,
+    /// The path or string to a Script config file.
     scripts: MaybeFile,
+    /// The path or string to a Grid config file.
     grid: Option<[u32; 2]>,
+    /// The path or string to an Input config file.
     input: MaybeFile,
 }
 impl GameBuilder {
+    /// Create a new ``GameBuilder`` struct by providing the size of the window.
     pub fn new(size: [f64; 2]) -> Self {
         GameBuilder {
             size,
@@ -27,6 +37,7 @@ impl GameBuilder {
             input: None,
         }
     }
+    /// Builds the ``Game`` or returns an error.
     pub fn build(self, factory: &mut GfxFactory) -> Result<Game, GameBuildError> {
         let mut g = Game::new(self.size);
         if let Some(grid) = self.grid {
@@ -96,34 +107,47 @@ impl GameBuilder {
         }
         Ok(g)
     }
+    /// Create a GUI from either a path to an external file or a ``str``.
     pub fn gui<F: Into<ExtFile>>(mut self, file: F) -> Self {
         self.gui = Some(file.into());
         self
     }
+    /// Create Characters from either a path to an external file or a ``str``.
     pub fn characters<F: Into<ExtFile>>(mut self, file: F) -> Self {
         self.characters = Some(file.into());
         self
     }
+    /// Create Backgrounds from either a path to an external file or a ``str``.
     pub fn backgrounds<F: Into<ExtFile>>(mut self, file: F) -> Self {
         self.backgrounds = Some(file.into());
         self
     }
+    /// Create Inputs from either a path to an external file or a ``str``.
     pub fn input<F: Into<ExtFile>>(mut self, file: F) -> Self {
         self.input = Some(file.into());
         self
     }
+    /// Create a Grid from either a path to an external file or a ``str``.
     pub fn grid(mut self, w: u32, h: u32) -> Self {
         self.grid = Some([w, h]);
         self
     }
+    /// Load scripts from either a path to an external file or a ``str``.
     pub fn scripts<F: Into<ExtFile>>(mut self, file: F) -> Self {
         self.scripts = Some(file.into());
         self
     }
 }
 
+/// Represents an external file OR a ``str``.
+///
+/// Note: when entering in a ['String'] to functions that take in an ``Into<ExtFile>``
+/// it assumes that a Path was entered. If this was wrong and in fact a ``str`` was entered,
+/// you have to write out the whole enum variant. E.g. ``ExtFile::Str("TOML File goes here")``
 pub enum ExtFile {
+    /// Represents a path to an external file that can be read.
     Path(String),
+    /// A String that acts as a TOML file.
     Str(String),
 }
 impl From<String> for ExtFile {

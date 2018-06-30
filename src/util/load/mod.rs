@@ -1,9 +1,11 @@
-pub mod character;
-pub mod load;
-pub mod input;
-pub mod gui;
-pub mod background;
-pub mod script;
+//! Helpful functions that load assets from a TOML file.
+
+mod character;
+mod load;
+mod input;
+mod gui;
+mod background;
+mod script;
 
 pub use self::{
     character::{
@@ -25,5 +27,6 @@ pub use self::{
     script::{
         load_scripts_from_file,
         load_scripts_from_str,
+        ScriptsFromFile,
     }
 };

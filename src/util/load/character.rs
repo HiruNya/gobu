@@ -17,6 +17,7 @@ type RawCharactersHashmap = HashMap<String, HashMap<String, ValueType>>;
 pub type ParsedCharactersHashmap = HashMap<String, CharacterFromFile>;
 pub type CharacterHashmap = HashMap<String, Character>;
 
+/// Load the characters from a TOML file
 pub fn load_characters_from_file<P: AsRef<Path>>(path: P, window: &mut GfxFactory)
     -> Result<CharacterHashmap, ConfigImportError> {
     let mut buffer = String::new();
@@ -24,6 +25,7 @@ pub fn load_characters_from_file<P: AsRef<Path>>(path: P, window: &mut GfxFactor
     load_characters_from_str(&buffer, window)
 }
 
+/// Load the characters from a TOML str
 pub fn load_characters_from_str(text: &str, factory: &mut GfxFactory)
     -> Result<CharacterHashmap, ConfigImportError> {
     let map: HashMap<String,
@@ -94,11 +96,16 @@ fn raw_hashmap_to_characters(map: RawCharactersHashmap, window: &mut GfxFactory)
     load_character_images(new_map, window)
 }
 
+/// A struct that represents
 #[derive(Debug)]
 pub struct CharacterFromFile {
+    /// The default state of the character
     pub default: String,
+    /// The different states of the character
     pub state_map: HashMap<String, String>,
+    /// The size of the character
     pub size: [f64; 2], // [Width, Height]
+    /// The offset of the character
     pub offset: Pos, // Offset is in percentage e.g. 0.5 = 50% therefore the origin is the centre.
 }
 
@@ -108,21 +115,3 @@ enum ValueType {
     String(String),
     NumberMap(HashMap<String, f64>),
 }
-
-//#[test]
-//fn test_deserialise() {
-//    let text = r#"
-//        [characters.cat_girl]
-//        default = "happy"
-//        happy = "./path/to/happy"
-//        sad = "./path/to/sad"
-//        offset = {x  = 0.5, y = 0.5}
-//
-//        [characters.dog_girl]
-//        cute = "./path/to/cute"
-//        normal = "./path/to/normal"
-//        size = {w = 200.0, height = 200.0}
-//    "#;
-//    println!("{:?}",
-//             load_characters_from_str(text));
-//}

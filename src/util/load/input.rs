@@ -18,6 +18,7 @@ use super::super::super::{
     error::ConfigImportError,
 };
 
+/// Load the inputs from a TOML file
 pub fn load_input_from_file<P: AsRef<Path>>(path: P)
     -> Result<GameInput, ConfigImportError> {
     let mut buffer = String::new();
@@ -25,6 +26,7 @@ pub fn load_input_from_file<P: AsRef<Path>>(path: P)
     load_input_from_str(&buffer)
 }
 
+/// Load the inputs from a TOML str
 pub fn load_input_from_str(text: &str)
     -> Result<GameInput, ConfigImportError> {
     let map: HashMap<String, Vec<InputFromFile>> = from_str(text)?;

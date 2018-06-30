@@ -1,3 +1,8 @@
+//! A variety of utility functions that make life easier.
+//!
+//! Contains specific functions that deal with the ``gfx_glyph`` crate but will
+//! only be compiled if the ``gfx_glyph_text`` feature is enabled.
+
 pub mod load;
 mod game_builder;
 #[cfg(feature = "gfx_glyph_text")]

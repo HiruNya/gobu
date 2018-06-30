@@ -1,4 +1,7 @@
-//use std::collections::HashMap;
+//! Manages the UI, which consists of only the textbox for now.
+//!
+//! In the future it is planned to also be in control of on-screen buttons as well.
+
 use piston_window::{
     context::Context,
     G2d,
@@ -25,15 +28,18 @@ pub use self::{
 };
 use super::Rect;
 
+/// A struct that manages all the textboxes.
 pub struct Ui {
-//    widgets: HashMap<u16, TextBox>,
+    /// The main textbox that displays the text.
     pub textbox: TextBox,
+    /// The textbox that displays the name of the speaker.
+    /// If ``None`` then nothing will be shown.
     pub speaker_box: Option<TextBox>,
 }
 
 impl Ui {
+    /// Creates a new ``Ui`` struct.
     pub fn new(canvas: Rect) -> Ui {
-//        let map = HashMap::new();
         let tb = TextBox::new(
             Rect {
                 x: 0.025 * canvas.w,
@@ -43,21 +49,19 @@ impl Ui {
             }
         );
         Ui {
-//            widgets: map,
             textbox: tb,
             speaker_box: None,
         }
     }
+    /// Draws the components that the Ui contains.
     #[cfg(not(feature = "gfx_glyph_text"))]
     pub fn draw(&mut self, c: Context, g: &mut G2d, glyph_cache: &mut Glyphs) {
-//        for v in self.widgets.values_mut() {
-//            v.draw(c, g, glyph_cache);
-//        }
         self.textbox.draw(c, g, glyph_cache);
         if let Some(ref mut e) = self.speaker_box {
             e.draw(c, g, glyph_cache)
         }
     }
+    /// Draws the components that the Ui contains.
     #[cfg(feature = "gfx_glyph_text")]
     pub fn draw(&mut self, c: Context, g: &mut G2d) {
         self.textbox.draw(c, g);
@@ -65,6 +69,7 @@ impl Ui {
             e.draw(c, g)
         }
     }
+    /// Queues the text into the Brush that will be drawn with ``draw_2d_with_text``
     #[cfg(feature = "gfx_glyph_text")]
     pub fn draw_text(&mut self, brush: &mut GlyphBrush<Resources, GfxFactory>) {
         self.textbox.draw_text(brush);

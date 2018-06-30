@@ -1,3 +1,5 @@
+//! Parses script files and turns them into ``ScriptStep``s
+
 mod dialogue;
 mod visible;
 mod spawn;
@@ -74,6 +76,8 @@ named!(translate_script(CompleteStr) -> IndexMap<String, Vec<ScriptStep>>,
     )
 );
 
+/// Translates a [`str`] into a [`Vec`] of ``ScriptSteps``.
+/// Returns an error if it fails.
 pub fn translate(text: &str)
     -> Result<IndexMap<String, Vec<ScriptStep>>, ScriptImportError> {
     match translate_script(CompleteStr(text)) {
