@@ -74,9 +74,6 @@ impl Script {
             index: (0, 0)
         }
     }
-//    pub fn add_step(&mut self, step: ScriptStep) {
-//        self.script.push(step)
-//    }
     /// Set a script with its name and maybe its anchor.
     pub fn set_script(&mut self, name: &str, anchor: Option<String>) {
         let mut index = self.index;
@@ -243,9 +240,3 @@ impl Game {
         }
     }
 }
-
-//impl From<(f64, f64)> for Pos {
-//    fn from(tuple: (f64, f64)) -> Pos {
-//        Pos {x: tuple.0, y: tuple.1}
-//    }
-//}

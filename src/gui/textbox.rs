@@ -26,7 +26,6 @@ use ::{
     gfx_device_gl::Resources,
     piston_window::GfxFactory,
 };
-//use std::clone::Clone;
 use super::Rect;
 use game::Game;
 
@@ -122,17 +121,6 @@ impl TextBox {
     fn calculate_inner(&mut self) {
         self.inner = self.padding.calculate_inner_rect(self.outer);
     }
-//    pub fn resize(&mut self, canvas: Rect) {
-//        let outer_rect = Rect {
-//            x: canvas.x + (canvas.w * self.percent.x),
-//            y: canvas.y + (canvas.h * self.percent.y),
-//            w: canvas.w * self.percent.w,
-//            h: canvas.h * self.percent.h,
-//        };
-//        self.outer = outer_rect;
-//        self.inner = self.padding.calculate_inner_rect(outer_rect);
-//        self.position_text();
-//    }
     #[cfg(not(feature = "gfx_glyph_text"))]
     fn position_text(&mut self) {
         let y = self.inner.pos.y + (self.font_size as f64);
@@ -201,11 +189,6 @@ impl TextBox {
                 c.transform,
                 g,
             );
-//        if self.text_changed {
-//            self.wrap_text(glyph_cache);
-//            self.position_text();
-//            self.text_changed = false;
-//        }
     }
     /// Queue the text of the textbox into the brush.
     #[cfg(feature = "gfx_glyph_text")]
@@ -348,12 +331,6 @@ impl Padding {
                     pos: outer_rect.pos + (outer_rect.size * pad),
                     size: outer_rect.size - (outer_rect.size * pad),
                 }
-//                Rect {
-//                    x: outer_rect.x + (outer_rect.w * pad),
-//                    y: outer_rect.y + (outer_rect.h * pad),
-//                    w: outer_rect.w - (outer_rect.w * pad),
-//                    h: outer_rect.h - (outer_rect.h * pad),
-//                }
             }
             Hv(h, v) => {
                 Rect {

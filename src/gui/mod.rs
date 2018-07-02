@@ -45,10 +45,6 @@ impl Ui {
             Rect {
                 pos: vec2![0.025, 0.675] * canvas.pos,
                 size: vec2![0.95, 0.5] * canvas.size,
-//                x: 0.025 * canvas.w,
-//                y: 0.675 * canvas.h,
-//                w: 0.95 * canvas.w,
-//                h: 0.3 * canvas.h,
             }
         );
         Ui {
@@ -80,11 +76,4 @@ impl Ui {
             e.draw_text(brush)
         }
     }
-//    pub fn resize(&mut self, canvas: Rect) {
-//        self.textbox.resize(canvas);
-//    }
 }
-
-//trait Widget {
-//    fn draw(&mut self, _: Context, _: &mut G2d, _: &mut Glyphs) {}
-//}

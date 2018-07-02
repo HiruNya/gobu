@@ -46,19 +46,6 @@ mod tests {}
 
 use coord::vec2::Vec2;
 
-///// Represents a rectangle
-//#[derive(Copy, Clone, Debug, Deserialize)]
-//pub struct Rect {
-//    /// The x - co-ordinate
-//    pub x: f64,
-//    /// The y - co-ordinate
-//    pub y: f64,
-//    /// The width of the rectangle
-//    pub w: f64,
-//    /// The height of the rectangle
-//    pub h: f64,
-//}
-
 /// Represents a rectangle
 #[derive(Copy, Clone, Debug, Deserialize)]
 pub struct Rect {
@@ -80,15 +67,6 @@ impl Rect {
         ]
     }
 }
-
-///// Represents a position
-//#[derive(Copy, Clone, Debug)]
-//pub struct Pos {
-//    /// The x - co-ordinate
-//    pub x: f64,
-//    /// The y - co-ordinate
-//    pub y: f64,
-//}
 
 /// Represents a position as a vector of [`f64`]s
 pub type Pos = Vec2<f64>;

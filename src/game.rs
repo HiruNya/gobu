@@ -168,11 +168,6 @@ impl Game {
     pub fn draw_text(&mut self, brush: &mut GlyphBrush<Resources, GfxFactory>) {
         self.ui.draw_text(brush)
     }
-    /*pub fn resize(&mut self, w: u32, h: u32) {
-        let rect = Rect {x: 0., y: 0., w: w as f64, h: h as f64};
-        self.background.resize(rect);
-//        self.ui.resize(rect);
-    }*/
     /// Add a [`Character`] to the HashMap of characters
     pub fn add_character(&mut self, name: String, character: Character) {
         self.characters.insert(name, character);

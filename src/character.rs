@@ -38,7 +38,6 @@ pub struct CharacterEntity {
     pub visible: bool,
     /// The name of the entity.
     pub name: String,
-//    pub pos: Pos,
     /// The offset of the images so that a specific point on the image can be used as the centre.
     /// Set to (0, 0) by default.
     pub offset: Pos,
@@ -117,7 +116,6 @@ impl Character {
             },
             visible: true,
             name,
-//            pos: Pos {x: 0., y: 0.},
             offset: self.offset,
         })
     }
