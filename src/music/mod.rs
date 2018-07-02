@@ -1,6 +1,5 @@
 //! The music that is stored and played by the game.
 
-use rodio::default_output_device;
 use std::{
     fs::File,
     io::Read,
@@ -28,7 +27,7 @@ pub struct Music {
     pub library: HashMap<String, Arc<[u8]>>,
 }
 impl Music {
-    /// Create a new ``Music`` struct. Returns an error if not possible.
+    /// Create a new [`Music`] struct. Returns an error if not possible.
     pub fn new() -> Result<Self, MusicError> {
         Ok(Music {
             player: Player::new(),

@@ -1,5 +1,5 @@
 [package]
-name = "svnf"
+name = "gobu"
 version = "0.1.0"
 authors = ["Hiruna Jayamanne <hirunav2@gmail.com>"]
 
@@ -12,7 +12,8 @@ toml = "0.4"
 indexmap = "1"
 rodio = "0.7"
 gfx_device_gl = "*"
-gfx_glyph = { version = "0.11", optional = true }
+coord = { version = "0.9", features = ["serialize"] }
+gfx_glyph = { version = "0.12", optional = true }
 
 [features]
 gfx_glyph_text = ["gfx_glyph"]

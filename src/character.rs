@@ -54,14 +54,13 @@ impl CharacterEntity {
     }
     /// Sets the position of the character. This accounts for the offset.
     pub fn set_pos(&mut self, pos: Pos) {
-        self.rect.x = pos.x;
-        self.rect.y = pos.y;
-        self.image = self.image.rect([
-            pos.x - (self.rect.w * self.offset.x),
-            pos.y - (self.rect.h * self.offset.y),
-            self.rect.w,
-            self.rect.h
-        ]);
+        self.rect.pos = pos;
+        let pos = pos - (self.rect.size * self.offset);
+        let rect = Rect {
+            pos,
+            size: self.rect.size,
+        };
+        self.image = self.image.rect(rect.to_slice());
     }
     /// Draws the character onto the screen.
     pub fn draw(&self, c: Context, g: &mut G2d) {
@@ -102,16 +101,20 @@ impl Character {
             default,
             state_map,
             size,
-            offset: Pos {x: 0., y: 0.}
+            offset: Pos::new(0., 0.)
         }
     }
     /// Spawns an entity of the character onto stage with the given ``name``.
     pub fn spawn(&self, name: String) -> Option<CharacterEntity> {
         let texture = self.state_map.get(&self.default)?.clone();
         Some(CharacterEntity {
-            image: Image::new(),
+            image: Image::new()
+                .rect([0., 0., self.size[0], self.size[1]]),
             texture,
-            rect: Rect {x: 0., y: 0., w: self.size[0], h: self.size[1]},
+            rect: Rect {
+                pos: Pos::new(0., 0.),
+                size: self.size.into(),
+            },
             visible: true,
             name,
 //            pos: Pos {x: 0., y: 0.},

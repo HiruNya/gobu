@@ -9,6 +9,7 @@ use piston_window::{
     Event,
     GfxFactory,
 };
+use coord::vec2::Vec2;
 #[cfg(not(feature = "gfx_glyph_text"))]
 use ::piston_window::Glyphs;
 #[cfg(feature = "gfx_glyph_text")]
@@ -91,10 +92,11 @@ impl Game {
     /// It is recommended to use [GameBuilder](./util/GameBuilder) to create your Game struct instead.
     pub fn new(size: [f64; 2]) -> Game {
         let size = Rect {
-            x: 0.,
-            y: 0.,
-            w: size[0],
-            h: size[1],
+            pos: Pos::new(0., 0.),
+            size: Vec2::new(
+                size[0],
+                size[1]
+            ),
         };
         Game{
             size,
@@ -148,7 +150,7 @@ impl Game {
     }
     /// Draws all the components of the game EXCEPT the text.
     ///
-    /// Use ``draw_text`` to set the text first.
+    /// Use [`draw_text`] to set the text first.
     #[cfg(feature = "gfx_glyph_text")]
     pub fn draw(&mut self, c: Context, g: &mut G2d) {
         clear(color::BLACK, g);
@@ -160,8 +162,8 @@ impl Game {
     }
     /// Slightly misleading as it doesn't draw it just yet, it just queues all the glyphs ready to be drawn.
     ///
-    /// To truly draw the text use the ``draw_2d_with_text`` function that is implemented on ``PistonWindow``
-    /// but remember to import the ``GfxGlyph`` trait first.
+    /// To truly draw the text use the [`draw_2d_with_text`] function that is implemented on [`PistonWindow`]
+    /// but remember to import the [`GfxGlyph`] trait first.
     #[cfg(feature = "gfx_glyph_text")]
     pub fn draw_text(&mut self, brush: &mut GlyphBrush<Resources, GfxFactory>) {
         self.ui.draw_text(brush)
@@ -171,7 +173,7 @@ impl Game {
         self.background.resize(rect);
 //        self.ui.resize(rect);
     }*/
-    /// Add a ``Character`` to the HashMap of characters
+    /// Add a [`Character`] to the HashMap of characters
     pub fn add_character(&mut self, name: String, character: Character) {
         self.characters.insert(name, character);
     }
@@ -180,7 +182,7 @@ impl Game {
         self.backgrounds.insert(name, background);
     }
     /// Add a character to the stage using the ``character`` argument as the key to the
-    /// characters HashMap and the ``name`` argument is the name of the ``CharacterEntity``
+    /// characters HashMap and the ``name`` argument is the name of the [`CharacterEntity`]
     /// That is spawned.
     ///
     /// Returns True if the character is spawned to the stage.
@@ -199,7 +201,7 @@ impl Game {
             self.background.set_texture(bg.clone());
         }
     }
-    /// Change the state of a ``CharacterEntity`` on the stage.
+    /// Change the state of a [`CharacterEntity`] on the stage.
     /// Returns True if the entity is changed.
     pub fn change_entity_state(&mut self, name: &String, state: &String) -> bool {
         if let Some(entity) = self.stage.get_mut(name) {
@@ -211,7 +213,7 @@ impl Game {
             } else {false}
         } else {false}
     }
-    /// Move a ``CharacterEntity``'s position on the screen.
+    /// Move a [`CharacterEntity`]'s position on the screen.
     /// (The position is relative to the grid you've specified).
     pub fn move_character(&mut self, name: &String, pos: Pos) {
         if let Some(entity) = self.stage.get_mut(name) {
@@ -234,7 +236,7 @@ impl Game {
         self.ui.speaker_box = Some(speaker_box);
     }
     /// Enables playing music in the game and returns a mutable reference in a result
-    /// to the newly created ``Music`` struct that can be used to play music.
+    /// to the newly created [`Music`] struct that can be used to play music.
     /// ```rust, no_run
     ///    if let Ok(music) = game.enable_music() {
     ///        music.add_music_from_file("gabriel", "C:\\Users\\Hiruna\\Music\\Songs\\01. ガヴリールドロップキック.flac")
@@ -256,7 +258,7 @@ impl Game {
         let map = load_characters_from_file(path, factory)?;
         Ok(self.load_characters(map))
     }
-    /// Load characters from a ``&str``.
+    /// Load characters from a [`&str`].
     /// Use this if you intend on compiling the TOML file and not keep it externally.
     /// Also could be used to load characters after decrypting a file.
     pub fn load_characters_from_str(&mut self, text: &str, factory: &mut GfxFactory) -> Result<(), ConfigImportError> {
@@ -275,7 +277,7 @@ impl Game {
         self.input.add_input(input);
         Ok(())
     }
-    /// Load input from a ``&str``.
+    /// Load input from a [`&str`].
     /// Use this if you intend on compiling the TOML file and not keep it externally.
     /// Also could be used to load characters after decrypting a file.
     pub fn load_input_from_str(&mut self, text: &str)
@@ -291,7 +293,7 @@ impl Game {
         self.load_gui(gui);
         Ok(())
     }
-    /// Load the GUI from a ``&str``.
+    /// Load the GUI from a [`&str`].
     /// Use this if you intend on compiling the TOML file and not keep it externally.
     /// Also could be used to load characters after decrypting a file.
     pub fn load_gui_from_str(&mut self, text: &str)
@@ -314,7 +316,7 @@ impl Game {
         let bgs = load_backgrounds_from_file(path, factory)?;
         Ok(self.load_backgrounds(bgs))
     }
-    /// Load the backgrounds from a ``&str``.
+    /// Load the backgrounds from a [`&str`].
     /// Use this if you intend on compiling the TOML file and not keep it externally.
     /// Also could be used to load characters after decrypting a file.
     pub fn load_backgrounds_from_str(&mut self, text: &str, factory: &mut GfxFactory)
@@ -331,7 +333,7 @@ impl Game {
         let scripts = load_scripts_from_file(path)?;
         Ok(self.load_scripts(scripts))
     }
-    /// Load scripts from a ``&str``.
+    /// Load scripts from a [`&str`].
     /// Use this if you intend on compiling the TOML file and not keep it externally.
     /// Also could be used to load characters after decrypting a file.
     pub fn load_scripts_from_str(&mut self, text: &str)

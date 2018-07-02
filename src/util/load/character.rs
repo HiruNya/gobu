@@ -89,7 +89,7 @@ fn raw_hashmap_to_characters(map: RawCharactersHashmap, window: &mut GfxFactory)
             default: default.unwrap_or("".to_string()),
             state_map: character_map,
             size: size.unwrap_or([0., 0.]),
-            offset: offset.unwrap_or(Pos {x: 0., y: 0.}),
+            offset: offset.unwrap_or(Pos::new(0., 0.)),
         };
         new_map.insert(k.clone(), character);
     }

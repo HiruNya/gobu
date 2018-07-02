@@ -8,6 +8,7 @@ use piston_window::{
     context::Context,
     draw_state::DrawState,
 };
+use coord::vec2::Vec2;
 #[cfg(not(feature = "gfx_glyph_text"))]
 use ::piston_window::{
     Glyphs,
@@ -69,7 +70,7 @@ pub struct TextBox {
     pub font_scale: Scale,
 }
 impl TextBox {
-    /// Create a new ``TextBox`` struct.
+    /// Create a new [`TextBox`] struct.
     #[cfg(not(feature = "gfx_glyph_text"))]
     pub fn new(rect: Rect) -> TextBox {
         let padding = Padding::Hv(0.025, 0.1);
@@ -86,7 +87,7 @@ impl TextBox {
             text_primitive: Text::new_color([1., 1., 1., 4.], 13),
         }
     }
-    /// Create a new ``TextBox`` struct.
+    /// Create a new [`TextBox`] struct.
     #[cfg(feature = "gfx_glyph_text")]
     pub fn new(rect: Rect) -> TextBox {
         let padding = Padding::Hv(0.025, 0.1);
@@ -134,7 +135,7 @@ impl TextBox {
 //    }
     #[cfg(not(feature = "gfx_glyph_text"))]
     fn position_text(&mut self) {
-        let y = self.inner.y + (self.font_size as f64);
+        let y = self.inner.pos.y + (self.font_size as f64);
         self.text_pos = y;
     }
     // Pretty much copied from ggez
@@ -151,7 +152,7 @@ impl TextBox {
                     Ok(e) => e,
                     Err(_) => 100.,
                 };
-                if text_width > self.inner.w {
+                if text_width > self.inner.size.x {
                     new_text.push(current_line);
                     current_line = word.to_string();
                 } else {
@@ -169,12 +170,7 @@ impl TextBox {
     pub fn draw(&mut self, c: Context, g: &mut G2d, glyph_cache: &mut Glyphs) {
         self.rect
             .draw(
-                [
-                    self.outer.x,
-                    self.outer.y,
-                    self.outer.w,
-                    self.outer.h
-                ],
+                self.outer.to_slice(),
                 &DrawState::default(),
                 c.transform,
                 g,
@@ -190,7 +186,7 @@ impl TextBox {
                     l.as_str(),
                     glyph_cache,
                     &DrawState::default(),
-                    c.transform.trans(self.inner.x, self.text_pos + ((self.font_size + self.line_gap) * i as u32) as f64),
+                    c.transform.trans(self.inner.pos.x, self.text_pos + ((self.font_size + self.line_gap) * i as u32) as f64),
                     g,
                 ).expect("Panicked when drawing text!");
         };
@@ -200,12 +196,7 @@ impl TextBox {
     pub fn draw(&self, c: Context, g: &mut G2d) {
         self.rect
             .draw(
-                [
-                    self.outer.x,
-                    self.outer.y,
-                    self.outer.w,
-                    self.outer.h
-                ],
+                self.outer.to_slice(),
                 &DrawState::default(),
                 c.transform,
                 g,
@@ -221,9 +212,9 @@ impl TextBox {
     pub fn draw_text(&self, brush: &mut GlyphBrush<Resources, GfxFactory>) {
         let section = Section {
             text: &self.text,
-            bounds: (self.inner.w as f32, self.inner.h as f32),
+            bounds: (self.inner.size.x as f32, self.inner.size.y as f32),
             color: self.color,
-            screen_position: (self.inner.x as f32, self.inner.y as f32),
+            screen_position: (self.inner.pos.x as f32, self.inner.pos.y as f32),
             scale: self.font_scale,
             ..Section::default()
         };
@@ -231,7 +222,7 @@ impl TextBox {
     }
 }
 
-/// A builder struct that helps build a ``TextBox``.
+/// A builder struct that helps build a [`TextBox`].
 #[derive(Clone, Debug, Deserialize)]
 pub struct TextBoxBuilder {
     rectangle_colour: Option<[f32; 4]>,
@@ -243,7 +234,7 @@ pub struct TextBoxBuilder {
     line_gap: Option<u32>
 }
 impl TextBoxBuilder {
-    /// Creates a new ``TextBoxBuilder``.
+    /// Creates a new [`TextBoxBuilder`].
     pub fn new() -> TextBoxBuilder {
         TextBoxBuilder {
             rectangle_colour: None,
@@ -255,10 +246,10 @@ impl TextBoxBuilder {
             line_gap: None,
         }
     }
-    /// Builds the ``TextBox``.
+    /// Builds the [`TextBox`].
     #[cfg(not(feature = "gfx_glyph_text"))]
     pub fn build(self, game: &Game) -> TextBox {
-        let rect = self.rectangle.unwrap_or( Rect{x: 0., y: 0., w: 0., h: 0.} );
+        let rect = self.rectangle.unwrap_or( Rect{pos: vec2![0.; 2], size: vec2![0.; 2]} );
         let mut text_box = TextBox::new(game.grid.get_abs_rect(rect));
         let text_prim = Text::new_color(
             self.text_colour.unwrap_or([1.; 4]),
@@ -280,10 +271,10 @@ impl TextBoxBuilder {
         }
         text_box
     }
-    /// Builds the ``TextBox``.
+    /// Builds the [`TextBox`].
     #[cfg(feature = "gfx_glyph_text")]
     pub fn build(self, game: &Game) -> TextBox {
-        let rect = self.rectangle.unwrap_or( Rect{x: 0., y: 0., w: 0., h: 0.} );
+        let rect = self.rectangle.unwrap_or( Rect{pos: vec2![0.; 2], size: vec2![0.; 2]} );
         let mut text_box = TextBox::new(game.grid.get_abs_rect(rect));
         if let Some(col) = self.rectangle_colour {
             text_box.rect = Rectangle::new(col);
@@ -354,26 +345,38 @@ impl Padding {
         match *self {
             All(pad) => {
                 Rect {
-                    x: outer_rect.x + (outer_rect.w * pad),
-                    y: outer_rect.y + (outer_rect.h * pad),
-                    w: outer_rect.w - (outer_rect.w * pad),
-                    h: outer_rect.h - (outer_rect.h * pad),
+                    pos: outer_rect.pos + (outer_rect.size * pad),
+                    size: outer_rect.size - (outer_rect.size * pad),
                 }
+//                Rect {
+//                    x: outer_rect.x + (outer_rect.w * pad),
+//                    y: outer_rect.y + (outer_rect.h * pad),
+//                    w: outer_rect.w - (outer_rect.w * pad),
+//                    h: outer_rect.h - (outer_rect.h * pad),
+//                }
             }
             Hv(h, v) => {
                 Rect {
-                    x: outer_rect.x + (outer_rect.w * h),
-                    y: outer_rect.y + (outer_rect.h * v),
-                    w: outer_rect.w - (outer_rect.w * h),
-                    h: outer_rect.h - (outer_rect.h * v),
+                    pos: vec2![
+                        outer_rect.pos.x + (outer_rect.size.x * h),
+                        outer_rect.pos.y + (outer_rect.size.y * v)
+                    ],
+                    size: vec2![
+                        outer_rect.size.x - (outer_rect.size.x * h * 2.),
+                        outer_rect.size.y - (outer_rect.size.y * v * 2.)
+                    ],
                 }
             }
             Tblr(t, b, l, r) => {
                 Rect {
-                    x: outer_rect.x + (outer_rect.w * l),
-                    y: outer_rect.y + (outer_rect.h * t),
-                    w: outer_rect.w - (outer_rect.w * r),
-                    h: outer_rect.h - (outer_rect.h * b),
+                    pos: vec2![
+                        outer_rect.pos.x + (outer_rect.size.x * l),
+                        outer_rect.pos.y + (outer_rect.size.y * t)
+                    ],
+                    size: vec2![
+                        outer_rect.size.x - (outer_rect.size.x * r),
+                        outer_rect.size.y - (outer_rect.size.y * b)
+                    ]
                 }
             }
             None => outer_rect,

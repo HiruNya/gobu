@@ -19,7 +19,6 @@ use indexmap::IndexMap;
 
 use super::{
     game::Game,
-    Pos,
     error::ScriptImportError,
 };
 use self::parser::translate;
@@ -66,7 +65,7 @@ pub struct Script {
     pub index: (usize, usize),
 }
 impl Script {
-    /// Create a new ``Script`` struct.
+    /// Create a new [`Script`] struct.
     pub fn new() -> Script {
         Script {
             step: 0,
@@ -131,7 +130,7 @@ impl Script {
             self.load_script(k.to_string(), v.clone());
         }
     }
-    /// Load scripts from a ``str``.
+    /// Load scripts from a [`&str`].
     pub fn load_from_str(&mut self, name: String, content: &str) -> Result<(), ScriptImportError> {
         self.load_script(name, translate(content)?);
         Ok(())
@@ -245,8 +244,8 @@ impl Game {
     }
 }
 
-impl From<(f64, f64)> for Pos {
-    fn from(tuple: (f64, f64)) -> Pos {
-        Pos {x: tuple.0, y: tuple.1}
-    }
-}
+//impl From<(f64, f64)> for Pos {
+//    fn from(tuple: (f64, f64)) -> Pos {
+//        Pos {x: tuple.0, y: tuple.1}
+//    }
+//}

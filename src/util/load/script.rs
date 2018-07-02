@@ -45,7 +45,7 @@ pub fn load_scripts_from_str(text: &str) -> Result<ScriptsFromFile, ScriptConfig
     })
 }
 
-/// The scripts that are loaded from the file before they are turned into a ``Character`` struct.
+/// The scripts that are loaded from the file before they are turned into a [`Character`] struct.
 pub struct ScriptsFromFile {
     /// The default script
     pub default: Option<String>,

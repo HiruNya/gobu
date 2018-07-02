@@ -24,7 +24,7 @@ pub struct Player {
     receiver: Receiver<PlayerMsg>,
 }
 impl Player {
-    /// Create a new ``Player`` struct.
+    /// Create a new [`Player`] struct.
     pub fn new() -> Self {
         let (to_thread, from_player) = channel();
         let (to_player, from_thread) = channel();

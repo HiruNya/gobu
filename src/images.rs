@@ -27,14 +27,14 @@ impl BackgroundImage {
     /// crate to do it.
     pub fn new(canvas: Rect) -> BackgroundImage {
         BackgroundImage {
-            image: Image::new().rect([canvas.x, canvas.y, canvas.w, canvas.h]),
+            image: Image::new().rect(canvas.to_slice()),
             texture: None,
         }
     }
     /// Sets the texture of the background.
     ///
     /// It is recommended to use the backgrounds HashMap and the function provided by
-    /// the ``Game`` struct instead.
+    /// the [`Game`] struct instead.
     pub fn set_texture(&mut self, texture: Arc<G2dTexture>) {
         self.texture = Some(texture);
     }
@@ -55,6 +55,6 @@ impl BackgroundImage {
     }
     /// Resizes the background image to the size of the rectangle.
     pub fn resize(&mut self, rect: Rect) {
-        self.image = self.image.rect([rect.x, rect.y, rect.w, rect.h]);
+        self.image = self.image.rect(rect.to_slice());
     }
 }

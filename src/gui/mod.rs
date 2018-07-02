@@ -6,6 +6,7 @@ use piston_window::{
     context::Context,
     G2d,
 };
+use coord::vec2::Vec2;
 #[cfg(not(feature = "gfx_glyph_text"))]
 use ::piston_window::Glyphs;
 #[cfg(feature = "gfx_glyph_text")]
@@ -38,14 +39,16 @@ pub struct Ui {
 }
 
 impl Ui {
-    /// Creates a new ``Ui`` struct.
+    /// Creates a new [`Ui`] struct.
     pub fn new(canvas: Rect) -> Ui {
         let tb = TextBox::new(
             Rect {
-                x: 0.025 * canvas.w,
-                y: 0.675 * canvas.h,
-                w: 0.95 * canvas.w,
-                h: 0.3 * canvas.h,
+                pos: vec2![0.025, 0.675] * canvas.pos,
+                size: vec2![0.95, 0.5] * canvas.size,
+//                x: 0.025 * canvas.w,
+//                y: 0.675 * canvas.h,
+//                w: 0.95 * canvas.w,
+//                h: 0.3 * canvas.h,
             }
         );
         Ui {
@@ -69,7 +72,7 @@ impl Ui {
             e.draw(c, g)
         }
     }
-    /// Queues the text into the Brush that will be drawn with ``draw_2d_with_text``
+    /// Queues the text into the Brush that will be drawn with [`draw_2d_with_text`]
     #[cfg(feature = "gfx_glyph_text")]
     pub fn draw_text(&mut self, brush: &mut GlyphBrush<Resources, GfxFactory>) {
         self.textbox.draw_text(brush);

@@ -6,7 +6,7 @@
 //!
 //! E.g.
 //! ```rust, no_run
-//! use svnf::util::GfxGlyph;
+//! use gobu::util::GfxGlyph;
 //! // ...
 //! window.draw_2d_with_text(&event, &mut brush, ||{
 //!     &game.draw(c, g);
@@ -27,13 +27,17 @@ use piston_window::{
 use gfx_glyph::GlyphBrush;
 use gfx_device_gl::Resources;
 
+/// A trait that implements drawing text with gfx_glyph onto PistonWindow
 pub trait GfxGlyph {
+    /// Similar to the draw_2d function of PistonWindow however it will draw the text
+    /// from gfx_glyph after everything in the closure has been drawn.
     fn draw_2d_with_text<E, F, U>(&mut self, e: &E, brush: &mut GlyphBrush<Resources, GfxFactory>, f: F)
         -> Result<Option<U>, String> where
         E: GenericEvent,
         F: FnOnce(Context, &mut G2d) -> U;
 }
 
+/// A trait that implements drawing text with gfx_glyph onto PistonWindow
 impl GfxGlyph for PistonWindow {
     // Mostly copied from piston_window however I added support for Gfx_glyph
     fn draw_2d_with_text<E, F, U>(&mut self, e: &E, brush: &mut GlyphBrush<Resources, GfxFactory>, f: F)

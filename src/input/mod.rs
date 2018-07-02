@@ -1,4 +1,4 @@
-//! The Piston events are taken and turned into [`GameEvents`]
+//! The Piston events are taken and turned into [`GameEvent`]s
 //!
 //! The events are then used to dictate what happens in the game.
 //! Currently on Continue is supported.
@@ -19,13 +19,13 @@ pub struct GameInput {
     pub continue_: HashSet<Button>
 }
 impl GameInput {
-    /// Create a new ``GameInput`` struct
+    /// Create a new [`GameInput`] struct
     pub fn new() -> Self {
         GameInput {
             continue_: HashSet::new(),
         }
     }
-    /// Handle a Piston Event and return a ``GameEvent``.
+    /// Handle a Piston Event and return a [`GameEvent`].
     pub fn handle_event(&self, button: &Button) -> Option<GameEvent> {
         if self.continue_.contains(button) { return Some(GameEvent::Continue) };
         None
@@ -38,7 +38,7 @@ impl GameInput {
     pub fn add_continue_events(&mut self, buttons: HashSet<Button>) {
         self.continue_.extend(buttons);
     }
-    /// Add input in the form of a ``GameInput`` struct.
+    /// Add input in the form of a [`GameInput`] struct.
     /// Just joins all of the data together.
     pub fn add_input(&mut self, input: GameInput) {
         self.add_continue_events(input.continue_);
