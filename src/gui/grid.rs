@@ -15,7 +15,7 @@ impl Grid {
     /// Create a new [`Grid`] struct.
     pub fn new(w: u32, h: u32, rect: Rect) -> Grid {
         let cells = vec2![w, h];
-        let cell_size = rect.size / vec2![cells.x as f64, cells.y as f64];
+        let cell_size = rect.size / cells.convert_to();
         Grid {
             cells,
             pos: rect.pos,

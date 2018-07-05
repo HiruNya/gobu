@@ -12,7 +12,7 @@ toml = "0.4"
 indexmap = "1"
 rodio = "0.7"
 gfx_device_gl = "*"
-coord = { version = "0.9", features = ["serialize"] }
+coord = { version = "0.11", features = ["serialize"] }
 gfx_glyph = { version = "0.12", optional = true }
 
 [features]
