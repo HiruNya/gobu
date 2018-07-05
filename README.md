@@ -4,7 +4,15 @@ A library for creating Visual Novels.
 You can create Visual Novels using pure Rust (hard) or by using TOML config files to import assets like Characters,
 Background Images, Input, and Scripts; and writing scripts using a syntax that is much simpler than how it would be in Rust.
 
-Contents:
+## Contents:
+* [Examples](#examples)
+* [Script Syntax](#script-syntax)
+* [TOML Files](#toml-files)
+
+## Examples
+See the [Example VN](https://github.com/HiruNya/example_vn) for an example as to how to make a game with minimal Rust knowledge.
+
+[ADD SCREENSHOT HERE]
 
 ## Script Syntax
 Example:
@@ -54,3 +62,14 @@ Plays the music 'Music'.
 STAGE 'BackgroundImage'
 ```
 Sets the background image to `BackgroundImage`.
+
+## TOML files
+An example TOML file that creates Characters. Most of these keys are optional.
+```TOML
+[CharacterName]
+default = "happy"
+happy = "./path/to/happy.png"
+sad = "./path/to/sad.png"
+offset = { x = 0.5, y = 0.5 }  # Centres the image
+size = { w = 32, h = 32 } # 32 pixels wide and high
+```
