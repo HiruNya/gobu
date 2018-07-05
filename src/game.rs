@@ -244,7 +244,7 @@ impl Game {
         if let Some(ref mut e) = self.music {
             Ok(e)
         } else {
-            Err(MusicError::NoDefaultOutputSourceFound)
+            Err(MusicError::NoDefaultOutputDeviceFound)
         }
     }
     /// Load characters from a TOML file.

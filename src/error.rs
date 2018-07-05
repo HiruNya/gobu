@@ -108,7 +108,7 @@ impl From<ScriptConfigImportError> for GameBuildError {
 #[derive(Debug)]
 pub enum MusicError {
     /// No default output device for playing music was found.
-    NoDefaultOutputSourceFound,
+    NoDefaultOutputDeviceFound,
     /// Error in decoding the music file.
     Decoder(DecoderError),
     /// Error finding and opening the file.

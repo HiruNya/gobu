@@ -2,42 +2,55 @@
 
 use std::{
     fs::File,
-    io::Read,
-    path::Path,
-    sync::{
-        Arc,
-        mpsc::SendError,
+    io::{
+        Read,
+        Cursor,
     },
+    path::Path,
+    sync::Arc,
     collections::HashMap,
 };
 use error::MusicError;
-
-mod player;
-
-use self::player::{
-    Player,
-    PlayerMsg,
+use rodio::{
+    Sink,
+    Source,
+    Decoder,
+    default_output_device,
 };
 
 /// The struct in charge of handling the music for the game.
 pub struct Music {
-    /// The player that plays the music.
-    pub player: Player,
-    /// A collection of music files in the form of buffered data.
+    /// The Rodio Sink that music can be played in.
+    pub sink: Sink,
+    /// A collection of music data in bytes.
     pub library: HashMap<String, Arc<[u8]>>,
+    /// Whether the music set will loop or not.
+    pub loop_: bool,
 }
 impl Music {
     /// Create a new [`Music`] struct. Returns an error if not possible.
     pub fn new() -> Result<Self, MusicError> {
-        Ok(Music {
-            player: Player::new(),
-            library: HashMap::new(),
-        })
+        if let Some(d) = default_output_device() {
+            Ok(Music {
+                sink: Sink::new(&d),
+                library: HashMap::new(),
+                loop_: true,
+            })
+        } else {
+            Err(MusicError::NoDefaultOutputDeviceFound)
+        }
     }
     /// Sets the music that is to be played.
-    pub fn set_music(&mut self, music: &str) -> Result<(), SendError<PlayerMsg>> {
+    pub fn set_music(&mut self, music: &str) -> Result<(), MusicError> {
         if let Some(m) = self.library.get(music) {
-            return self.player.set(m.clone())
+            let c = Cursor::new(m.clone());
+            let d = Decoder::new(c)?;
+            if self.loop_ {
+                self.sink.append(d.repeat_infinite());
+            } else {
+                self.sink.append(d);
+            }
+            self.sink.play();
         }
         Ok(())
     }
@@ -52,5 +65,9 @@ impl Music {
     /// Add the buffered data of a music file.
     pub fn add_music(&mut self, name: String, music: Vec<u8>) {
         self.library.insert(name, Arc::from(music));
+    }
+    /// If ``True`` will cause the music that is played to loop infinitely.
+    pub fn set_loop(&mut self, loop_: bool) {
+        self.loop_ = loop_;
     }
 }
