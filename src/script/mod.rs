@@ -49,6 +49,8 @@ pub enum ScriptStep {
     /// Go to a specific script or part of a script
     /// (ScriptName, AnchorName)
     GoTo(Option<String>, Option<String>),
+    /// Play music
+    Play(String),
     /// End of the script/game
     End,
 }
@@ -233,6 +235,15 @@ impl Game {
                 self.story.set_script(&name, anchor);
                 true
             },
+            Play(name) => {
+                if let Some(ref mut m) = self.music {
+                    // Ignore the result.
+                    // In the future, this might actually be used.
+                    // Maybe...
+                    let _ = m.set_music(&name);
+                }
+                true
+            }
             End => {
                 self.story.step -= 1;
                 false

@@ -9,6 +9,7 @@ mod move_p;
 mod stage;
 mod end;
 mod goto;
+mod play;
 
 use indexmap::IndexMap;
 use nom::types::CompleteStr;
@@ -21,6 +22,7 @@ use self::{
     stage::stage,
     end::end,
     goto::goto,
+    play::play,
 };
 use super::ScriptStep;
 use super::super::error::ScriptImportError;
@@ -37,6 +39,7 @@ named!(translate_to_step(CompleteStr) -> Vec<ScriptStep>,
                 | stage
                 | end
                 | goto
+                | play
             )
         )
     )
