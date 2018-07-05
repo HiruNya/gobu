@@ -12,7 +12,7 @@ Background Images, Input, and Scripts; and writing scripts using a syntax that i
 ## Examples
 See the [Example VN](https://github.com/HiruNya/example_vn) for an example as to how to make a game with minimal Rust knowledge.
 
-[ADD SCREENSHOT HERE]
+![SCREENSHOT](https://user-images.githubusercontent.com/20044495/42315772-5e253856-809c-11e8-8eb0-cb2d26a6620c.PNG)
 
 ## Script Syntax
 Example:
