@@ -97,6 +97,8 @@ pub enum GameBuildError {
     Story(ScriptConfigImportError),
     /// Error importing the Input file.
     Input(ConfigImportError),
+    /// Error importing the Music file.
+    Music(ConfigImportError),
 }
 impl From<ScriptConfigImportError> for GameBuildError {
     fn from(err: ScriptConfigImportError) -> GameBuildError {

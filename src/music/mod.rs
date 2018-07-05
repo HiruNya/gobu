@@ -10,7 +10,16 @@ use std::{
     sync::Arc,
     collections::HashMap,
 };
-use error::MusicError;
+use ::{
+    error::{
+        MusicError,
+        ConfigImportError,
+    },
+    util::load::{
+        load_music_from_file,
+        load_music_from_str,
+    },
+};
 use rodio::{
     Sink,
     Source,
@@ -69,5 +78,17 @@ impl Music {
     /// If ``True`` will cause the music that is played to loop infinitely.
     pub fn set_loop(&mut self, loop_: bool) {
         self.loop_ = loop_;
+    }
+    /// Loads music from a TOML file.
+    pub fn load_from_config_file<P: AsRef<Path>>(&mut self, path: P) -> Result<(), ConfigImportError> {
+        let map = load_music_from_file(path)?;
+        self.library.extend(map);
+        Ok(())
+    }
+    /// Loads music from a [`&str`] using TOML syntax.
+    pub fn load_from_config_str(&mut self, text: &str) -> Result<(), ConfigImportError> {
+        let map = load_music_from_str(text)?;
+        self.library.extend(map);
+        Ok(())
     }
 }

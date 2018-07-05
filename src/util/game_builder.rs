@@ -23,6 +23,8 @@ pub struct GameBuilder {
     grid: Option<[u32; 2]>,
     /// The path or string to an Input config file.
     input: MaybeFile,
+    /// The path or string to a Music config file.
+    music: MaybeFile,
 }
 impl GameBuilder {
     /// Create a new [`GameBuilder`] struct by providing the size of the window.
@@ -35,6 +37,7 @@ impl GameBuilder {
             scripts: None,
             grid: None,
             input: None,
+            music: None,
         }
     }
     /// Builds the [`Game`] or returns an error.
@@ -105,6 +108,21 @@ impl GameBuilder {
                 },
             }
         }
+        if let Some(e) = self.music {
+            if let Ok(m) = g.enable_music() {
+                let result = match e {
+                    ExtFile::Path(p) => {
+                        m.load_from_config_file(&p)
+                    },
+                    ExtFile::Str(s) => {
+                        m.load_from_config_str(&s)
+                    },
+                };
+                if let Err(er) = result {
+                    return Err( GameBuildError::Music(er) )
+                }
+            }
+        }
         Ok(g)
     }
     /// Create a GUI from either a path to an external file or a [`&str`].
@@ -135,6 +153,11 @@ impl GameBuilder {
     /// Load scripts from either a path to an external file or a [`&str`].
     pub fn scripts<F: Into<ExtFile>>(mut self, file: F) -> Self {
         self.scripts = Some(file.into());
+        self
+    }
+    /// Load music from either a path to an external file or a [`&str`].
+    pub fn music<F: Into<ExtFile>>(mut self, file: F) -> Self {
+        self.music = Some(file.into());
         self
     }
 }

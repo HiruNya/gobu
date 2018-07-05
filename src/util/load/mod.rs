@@ -6,6 +6,7 @@ mod input;
 mod gui;
 mod background;
 mod script;
+mod music;
 
 pub use self::{
     character::{
@@ -28,5 +29,9 @@ pub use self::{
         load_scripts_from_file,
         load_scripts_from_str,
         ScriptsFromFile,
-    }
+    },
+    music::{
+        load_music_from_file,
+        load_music_from_str,
+    },
 };
