@@ -51,10 +51,12 @@ SPAWN 'Character'
 Spawns a ``CharacterEntity`` using a ``Character``. A ``CharacterEntity`` is the object which is drawn and moved across stage.
 The entity would be called the same name as the character.
 ```
-SPAWN 'Character' as 'Character2' at (3.0, 2.0)
+SPAWN 'Character' as 'Character2' at (3.0, 2.0) with 'Transition'
 ```
 Spawn a ``CharacterEntity`` calling the entity "Character2" instead of "Character" by using the ``as`` syntax.
-The ``at`` part defines the position of where it should be spawned. Both ``as`` and ``at`` are optional.
+The ``at`` part defines the position of where it should be spawned.
+The ``with`` part defines a Transition to be used when the Character spawns. This Transition must be defined in a TOML file.
+``as``, ``at`` and ``with`` are all optional.
 ```
 KILL 'Character1'
 ```
