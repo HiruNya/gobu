@@ -4,6 +4,27 @@ A library for creating Visual Novels.
 You can create Visual Novels using pure Rust (hard) or by using TOML config files to import assets like Characters,
 Background Images, Input, and Scripts; and writing scripts using a syntax that is much simpler than how it would be in Rust.
 
+<b>NB: Only support a linear story at this point however support for branching plotlines is planned.</b>
+
+Feedback is welcome! Feel free to create an issue!
+
+## Currently Supports:
+* Drawing Backgrounds
+* Drawing Characters
+* Drawing TextBoxes
+* A scripting parser that can turn a script into directions.
+* Playing Music (Background Music Only for now) via Rodio
+* Character Transitions (FadeIn and FadeOut are currently the only ones supported and only on spawn)
+
+## To Do:
+* Add the ability to create VNs with branching plotlines.
+Unfortunately this is the hardest one as it requires me trying to figure out how to make buttons work and how I would
+implement it in the script. This is unfortunately probably the furthest away from being done.
+* Play Sound Effects and Character Monologues
+* Adding more Transitions like SlideFromLeft
+* Adding more Transitions to other events like Show, Hide and Kill (This one seems easy)
+* Adding Transitions to the Background.
+
 ## Contents:
 * [Examples](#examples)
 * [Script Syntax](#script-syntax)
