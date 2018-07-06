@@ -38,8 +38,9 @@ pub enum ScriptStep {
     /// Hides an entity using its name
     Hide(String),
     /// Spawns a character with a specific entity name and also possibly a position.
-    /// (CharacterName, Some(EntityName), Some(Position))
-    Spawn(String, Option<String>, Option<(f64, f64)>),
+    /// The last element is a transition that can be used.
+    /// (CharacterName, Some(EntityName), Some(Position), Some(TransitionName))
+    Spawn(String, Option<String>, Option<(f64, f64)>, Option<String>),
     /// Kill an entity
     Kill(String),
     /// Move an entity to a specific position
@@ -200,11 +201,14 @@ impl Game {
                 }
                 true
             },
-            Spawn(character, entity, maybe_pos) => {
+            Spawn(character, entity, maybe_pos, maybe_trans) => {
                 let name = entity.clone().unwrap_or(character.clone());
                 self.add_to_stage(name.clone(), character.clone());
                 if let Some(pos) = maybe_pos {
                     self.move_character(&name, pos.into());
+                }
+                if let Some(trans) = maybe_trans {
+                    self.apply_character_transition(&name, &trans);
                 }
                 true
             },

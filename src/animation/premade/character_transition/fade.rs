@@ -13,16 +13,16 @@ pub struct FadeIn {
 }
 impl FadeIn {
     /// Create a new [`FadeIn`] struct giving in the amount of time you wish the transition to end by.
-    pub fn new(time: f32) -> Self {
-        FadeIn {
+    pub fn new(time: f32) -> Box<dyn CharacterTransition> {
+        Box::new(FadeIn {
             time_elapsed: 0.,
             in_time: time,
-        }
+        })
     }
 }
 impl CharacterTransition for FadeIn {
-    fn create(&self) -> FadeIn {
-        *self
+    fn create(&self) -> Box<dyn CharacterTransition> {
+        Box::new(*self)
     }
     fn update(&mut self, image: &mut Image, delta_time: f64) -> TransResult {
         self.time_elapsed += delta_time as f32;
@@ -46,16 +46,16 @@ pub struct FadeOut {
 }
 impl FadeOut {
     /// Create a new [`FadeOut`] struct giving in the amount of time you wish the transition to end by.
-    pub fn new(time: f32) -> Self {
-        FadeOut {
+    pub fn new(time: f32) -> Box<dyn CharacterTransition> {
+        Box::new(FadeOut {
             time_left: time,
             in_time: time,
-        }
+        })
     }
 }
 impl CharacterTransition for FadeOut {
-    fn create(&self) -> FadeOut {
-        *self
+    fn create(&self) -> Box<dyn CharacterTransition> {
+        Box::new(*self)
     }
     fn update(&mut self, image: &mut Image, delta_time: f64) -> TransResult {
         self.time_left -= delta_time as f32;

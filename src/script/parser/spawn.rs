@@ -29,12 +29,20 @@ named!(pub spawn(CompleteStr) -> ScriptStep,
                         ),
                         |name| Args::Name(name.to_string())
                     )
+                    | map!(
+                        preceded!(
+                            tag!("with"),
+                            quote
+                        ),
+                        |trans| Args::Trans(trans.to_string())
+                    )
                 )
             )
         ),
         |(character, list)| {
             let mut name = None;
             let mut pos = None;
+            let mut trans = None;
             for item in list {
                 match item {
                     Args::Name(n) => {
@@ -42,10 +50,13 @@ named!(pub spawn(CompleteStr) -> ScriptStep,
                     },
                     Args::Pos(x, y) => {
                         pos = Some((x, y))
-                    }
+                    },
+                    Args::Trans(t) => {
+                        trans = Some(t.to_string())
+                    },
                 }
             }
-            ScriptStep::Spawn(character.to_string(), name, pos)
+            ScriptStep::Spawn(character.to_string(), name, pos, trans)
         }
     )
 );
@@ -53,6 +64,7 @@ named!(pub spawn(CompleteStr) -> ScriptStep,
 enum Args {
     Name(String),
     Pos(f64, f64),
+    Trans(String)
 }
 
 #[test]

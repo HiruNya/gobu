@@ -21,8 +21,8 @@ impl Animation {
         }
     }
     /// Insert a struct that implements [`CharacterTransition`] into the hashmap of [`CharacterTransition`]s
-    pub fn insert_char_trans<T: CharacterTransition + 'static>(&mut self, name: String, trans: T) {
-        self.char_trans.insert(name, Box::new(trans));
+    pub fn insert_char_trans(&mut self, name: String, trans: Box<dyn CharacterTransition>) {
+        self.char_trans.insert(name, trans);
     }
 }
 
@@ -32,7 +32,7 @@ pub trait CharacterTransition {
     /// This is because the struct which implements this trait shall be stored in a HashMap and
     /// therefore when a transition is needed we take the object in the HashMap and call [`create`]
     /// on it.
-    fn create(&self) -> Self where Self: Sized;
+    fn create(&self) -> Box<CharacterTransition>;
     /// Every time the game updates, the entity will call this method and provide it's image.
     /// ``delta_time`` is the amount of time that has passed since the last update event.
     /// This will return a TransResult. If ``Finished`` then the animation shall be removed.

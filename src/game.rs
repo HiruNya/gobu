@@ -268,6 +268,14 @@ impl Game {
             Err(MusicError::NoDefaultOutputDeviceFound)
         }
     }
+    /// Applies a ``CharacterTransition`` from anime onto a [`CharacterEntity`]
+    pub fn apply_character_transition(&mut self, character_name: &String, transition_name: &String) {
+        if let Some(entity) = self.stage.get_mut(character_name) {
+            if let Some(trans) = self.anims.char_trans.get(transition_name) {
+                entity.apply_trans(trans.create());
+            }
+        }
+    }
     /// Load characters from a TOML file.
     pub fn load_characters_from_file<P: AsRef<Path>>(&mut self, path: P, factory: &mut GfxFactory)
         -> Result<(), ConfigImportError> {

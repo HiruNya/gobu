@@ -78,6 +78,11 @@ impl CharacterEntity {
             );
         }
     }
+    /// Applies a [`CharacterTransition`] to the entity.
+    pub fn apply_trans(&mut self, trans: Box<dyn CharacterTransition>) {
+        self.finish();
+        self.anim = Some(trans);
+    }
     /// Updates the animation struct if possible.
     pub fn update(&mut self, delta_time: f64) {
         use super::animation::TransResult;
