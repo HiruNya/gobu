@@ -59,7 +59,8 @@ use super::{
     },
     music::{
         Music,
-    }
+    },
+    animation::Animation,
 };
 
 /// The game
@@ -84,6 +85,8 @@ pub struct Game {
     pub input: GameInput,
     /// The music that is played in the game. (This is optional)
     pub music: Option<Music>,
+    /// The animations that are displayed in the game like CharacterTransitions.
+    pub anims: Animation,
 }
 
 impl Game {
@@ -109,11 +112,15 @@ impl Game {
             grid: Grid::new(1, 1, size),
             input: GameInput::new(),
             music: None,
+            anims: Animation::new(),
         }
     }
     /// Handles a piston event. Currently only going forward in the story is supported.
     pub fn handle_event(&mut self, event: &Event) {
-        use self::Event::Input;
+        use self::Event::{
+            Input,
+            Loop,
+        };
         match *event {
             Input(ref i) => {
                 use piston_window::{
@@ -127,9 +134,23 @@ impl Game {
                         if let Some(e) = event {
                             match e {
                                 GameEvent::Continue => {
+                                    for i in self.stage.values_mut() {
+                                        i.finish()
+                                    }
                                     self.next_step();
                                 },
                             }
+                        }
+                    },
+                    _ => {},
+                }
+            },
+            Loop(l) => {
+                use piston_window::Loop;
+                match l {
+                    Loop::Update(args) => {
+                        for i in self.stage.values_mut() {
+                            i.update(args.dt)
                         }
                     },
                     _ => {},

@@ -24,7 +24,11 @@ use std::{
     collections::HashMap,
 };
 
-use super::{Rect, Pos};
+use super::{
+    Rect,
+    Pos,
+    animation::CharacterTransition,
+};
 
 /// The entity of a character that is spawned into the stage.
 pub struct CharacterEntity {
@@ -41,6 +45,8 @@ pub struct CharacterEntity {
     /// The offset of the images so that a specific point on the image can be used as the centre.
     /// Set to (0, 0) by default.
     pub offset: Pos,
+    /// The [`CharacterTransition`] that happens on the entity.
+    pub anim: Option<Box<dyn CharacterTransition>>,
 }
 impl CharacterEntity {
     /// Sets the visibility of the character on screen.
@@ -71,6 +77,27 @@ impl CharacterEntity {
                 g
             );
         }
+    }
+    /// Updates the animation struct if possible.
+    pub fn update(&mut self, delta_time: f64) {
+        use super::animation::TransResult;
+        let result = {
+            if let Some(ref mut e) = self.anim {
+                e.update(&mut self.image, delta_time)
+            } else {
+                TransResult::Continue
+            }
+        };
+        if result == TransResult::Finished {
+            self.anim = None;
+        }
+    }
+    /// Finishes the animation struct if possible.
+    pub fn finish(&mut self) {
+        if let Some(ref mut e) = self.anim {
+            e.finish(&mut self.image);
+        }
+        self.anim = None;
     }
 }
 
@@ -117,6 +144,7 @@ impl Character {
             visible: true,
             name,
             offset: self.offset,
+            anim: None,
         })
     }
     /// Adds a state to the character. This can be something like "sad" or "happy"

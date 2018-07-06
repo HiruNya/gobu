@@ -37,6 +37,7 @@ pub mod util;
 pub mod input;
 pub mod error;
 pub mod music;
+pub mod animation;
 
 pub use game::Game;
 pub use util::GameBuilder;
