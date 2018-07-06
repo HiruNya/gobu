@@ -8,6 +8,8 @@ Background Images, Input, and Scripts; and writing scripts using a syntax that i
 
 Feedback is welcome! Feel free to create an issue!
 
+[Documentation](https://hirunya.github.io/docs/gobu/)
+
 ## Currently Supports:
 * Drawing Backgrounds
 * Drawing Characters
