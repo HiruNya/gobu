@@ -25,6 +25,8 @@ pub struct GameBuilder {
     input: MaybeFile,
     /// The path or string to a Music config file.
     music: MaybeFile,
+    /// The path or string to a Transition config file.
+    transitions: MaybeFile,
 }
 impl GameBuilder {
     /// Create a new [`GameBuilder`] struct by providing the size of the window.
@@ -38,6 +40,7 @@ impl GameBuilder {
             grid: None,
             input: None,
             music: None,
+            transitions: None,
         }
     }
     /// Builds the [`Game`] or returns an error.
@@ -123,6 +126,21 @@ impl GameBuilder {
                 }
             }
         }
+        if let Some(t) = self.transitions {
+            let result = {
+                match t {
+                    ExtFile::Path(p) => {
+                        g.load_transitions_from_file(&p)
+                    },
+                    ExtFile::Str(s) => {
+                        g.load_transitions_from_str(&s)
+                    },
+                }
+            };
+            if let Err(e) = result {
+                return Err( GameBuildError::Transition(e) )
+            }
+        }
         Ok(g)
     }
     /// Create a GUI from either a path to an external file or a [`&str`].
@@ -158,6 +176,11 @@ impl GameBuilder {
     /// Load music from either a path to an external file or a [`&str`].
     pub fn music<F: Into<ExtFile>>(mut self, file: F) -> Self {
         self.music = Some(file.into());
+        self
+    }
+    /// Load transitions from either a path to an external file or a [`&str`].
+    pub fn transitions<F: Into<ExtFile>>(mut self, file: F) -> Self {
+        self.transitions = Some(file.into());
         self
     }
 }

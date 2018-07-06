@@ -99,6 +99,8 @@ pub enum GameBuildError {
     Input(ConfigImportError),
     /// Error importing the Music file.
     Music(ConfigImportError),
+    /// Error importing the Transition file.
+    Transition(ConfigImportError),
 }
 impl From<ScriptConfigImportError> for GameBuildError {
     fn from(err: ScriptConfigImportError) -> GameBuildError {

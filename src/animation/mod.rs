@@ -20,6 +20,10 @@ impl Animation {
             char_trans: HashMap::new(),
         }
     }
+    /// Take the transitions from one struct and put it into itself.
+    pub fn extend(&mut self, other: Animation) {
+        self.char_trans.extend(other.char_trans);
+    }
     /// Insert a struct that implements [`CharacterTransition`] into the hashmap of [`CharacterTransition`]s
     pub fn insert_char_trans(&mut self, name: String, trans: Box<dyn CharacterTransition>) {
         self.char_trans.insert(name, trans);

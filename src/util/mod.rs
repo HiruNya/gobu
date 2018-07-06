@@ -16,6 +16,7 @@ pub use self::{
         load_backgrounds_from_file,
         load_scripts_from_file,
         load_music_from_file,
+        load_transitions_from_file,
     },
     game_builder::{
         GameBuilder,

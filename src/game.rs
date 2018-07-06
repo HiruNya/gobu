@@ -42,12 +42,14 @@ use super::{
         load_gui_from_file,
         load_backgrounds_from_file,
         load_scripts_from_file,
+        load_transitions_from_file,
         load::{
             load_input_from_str,
             load_characters_from_str,
             load_gui_from_str,
             load_backgrounds_from_str,
             load_scripts_from_str,
+            load_transitions_from_str,
             ScriptsFromFile,
         },
     },
@@ -359,7 +361,7 @@ impl Game {
     }
     /// Load scripts from a [`&str`].
     /// Use this if you intend on compiling the TOML file and not keep it externally.
-    /// Also could be used to load characters after decrypting a file.
+    /// Also could be used to load the scripts after decrypting a file.
     pub fn load_scripts_from_str(&mut self, text: &str)
         -> Result<(), ScriptConfigImportError> {
         let scripts = load_scripts_from_str(text)?;
@@ -370,5 +372,22 @@ impl Game {
         if let Some(e) = file.default {
             self.story.set_script(&e, None);
         }
+    }
+    /// Load transitions from a TOML file.
+    pub fn load_transitions_from_file<P: AsRef<Path>>(&mut self, path: P)
+        -> Result<(), ConfigImportError> {
+        let trans = load_transitions_from_file(path)?;
+        Ok(self.load_transitions(trans))
+    }
+    /// Load transitions from a [`&str`].
+    /// Use this if you intend on compiling the TOML file and not keep it externally.
+    /// Also could be used to load transitions after decrypting a file.
+    pub fn load_transitions_from_str(&mut self, text: &str)
+        -> Result<(), ConfigImportError> {
+        let trans = load_transitions_from_str(text)?;
+        Ok(self.load_transitions(trans))
+    }
+    fn load_transitions(&mut self, anim: Animation) {
+        self.anims.extend(anim)
     }
 }

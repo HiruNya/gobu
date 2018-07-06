@@ -7,6 +7,7 @@ mod gui;
 mod background;
 mod script;
 mod music;
+mod transition;
 
 pub use self::{
     character::{
@@ -34,4 +35,8 @@ pub use self::{
         load_music_from_file,
         load_music_from_str,
     },
+    transition::{
+        load_transitions_from_file,
+        load_transitions_from_str,
+    }
 };
