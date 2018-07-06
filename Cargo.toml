@@ -1,6 +1,6 @@
 [package]
 name = "gobu"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Hiruna Jayamanne <hirunav2@gmail.com>"]
 
 [dependencies]
