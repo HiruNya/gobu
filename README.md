@@ -15,8 +15,9 @@ Feedback is welcome! Feel free to create an issue!
 * Drawing Characters
 * Drawing TextBoxes
 * A scripting parser that can turn a script into directions.
-* Playing Music (Background Music Only for now) via Rodio
-* Character Transitions (FadeIn and FadeOut are currently the only ones supported and only on spawn)
+* Playing Music (Background Music Only for now) via [Rodio](https://github.com/tomaka/rodio)
+(Supports MP3, WAV, Vorbis, and Flac.)
+* Character Transitions (FadeIn and FadeOut are currently the only ones supported, however you can make your own one)
 
 ## To Do:
 * Add the ability to create VNs with branching plotlines.
@@ -24,7 +25,6 @@ Unfortunately this is the hardest one as it requires me trying to figure out how
 implement it in the script. This is unfortunately probably the furthest away from being done.
 * Play Sound Effects and Character Monologues
 * Adding more Transitions like SlideFromLeft
-* Adding more Transitions to other events like Show, Hide and Kill (This one seems easy)
 * Adding Transitions to the Background.
 
 ## Contents:
