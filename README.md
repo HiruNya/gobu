@@ -4,6 +4,29 @@ A library for creating Visual Novels.
 You can create Visual Novels using pure Rust (hard) or by using TOML config files to import assets like Characters,
 Background Images, Input, and Scripts; and writing scripts using a syntax that is much simpler than how it would be in Rust.
 
+<b>NB: Only support a linear story at this point however support for branching plotlines is planned.</b>
+
+Feedback is welcome! Feel free to create an issue!
+
+[Documentation](https://hirunya.github.io/docs/gobu/)
+
+## Currently Supports:
+* Drawing Backgrounds
+* Drawing Characters
+* Drawing TextBoxes
+* A scripting parser that can turn a script into directions.
+* Playing Music (Background Music Only for now) via Rodio
+* Character Transitions (FadeIn and FadeOut are currently the only ones supported and only on spawn)
+
+## To Do:
+* Add the ability to create VNs with branching plotlines.
+Unfortunately this is the hardest one as it requires me trying to figure out how to make buttons work and how I would
+implement it in the script. This is unfortunately probably the furthest away from being done.
+* Play Sound Effects and Character Monologues
+* Adding more Transitions like SlideFromLeft
+* Adding more Transitions to other events like Show, Hide and Kill (This one seems easy)
+* Adding Transitions to the Background.
+
 ## Contents:
 * [Examples](#examples)
 * [Script Syntax](#script-syntax)
@@ -30,10 +53,12 @@ SPAWN 'Character'
 Spawns a ``CharacterEntity`` using a ``Character``. A ``CharacterEntity`` is the object which is drawn and moved across stage.
 The entity would be called the same name as the character.
 ```
-SPAWN 'Character' as 'Character2' at (3.0, 2.0)
+SPAWN 'Character' as 'Character2' at (3.0, 2.0) with 'Transition'
 ```
 Spawn a ``CharacterEntity`` calling the entity "Character2" instead of "Character" by using the ``as`` syntax.
-The ``at`` part defines the position of where it should be spawned. Both ``as`` and ``at`` are optional.
+The ``at`` part defines the position of where it should be spawned.
+The ``with`` part defines a Transition to be used when the Character spawns. This Transition must be defined in a TOML file.
+``as``, ``at`` and ``with`` are all optional.
 ```
 KILL 'Character1'
 ```
