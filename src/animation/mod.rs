@@ -14,7 +14,7 @@ pub struct Animation {
     pub char_trans: HashMap<String, Box<CharacterTransition>>
 }
 impl Animation {
-    /// Create a new [`Animation'] struct.
+    /// Create a new [`Animation`] struct.
     pub fn new() -> Self {
         Animation {
             char_trans: HashMap::new(),

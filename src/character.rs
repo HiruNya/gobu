@@ -47,11 +47,17 @@ pub struct CharacterEntity {
     pub offset: Pos,
     /// The [`CharacterTransition`] that happens on the entity.
     pub anim: Option<Box<dyn CharacterTransition>>,
+    pub to_be_killed: bool,
+    pub to_be_hidden: bool,
 }
 impl CharacterEntity {
     /// Sets the visibility of the character on screen.
     pub fn set_visible(&mut self, visible: bool) {
         self.visible = visible;
+        if self.visible {
+            self.to_be_killed = false;
+            self.to_be_hidden = false;
+        }
     }
     /// Sets the texture of the character.
     pub fn set_texture(&mut self, texture: Arc<G2dTexture>) {
@@ -84,7 +90,7 @@ impl CharacterEntity {
         self.anim = Some(trans);
     }
     /// Updates the animation struct if possible.
-    pub fn update(&mut self, delta_time: f64) {
+    pub fn update(&mut self, delta_time: f64) -> EntityResult {
         use super::animation::TransResult;
         let result = {
             if let Some(ref mut e) = self.anim {
@@ -94,8 +100,18 @@ impl CharacterEntity {
             }
         };
         if result == TransResult::Finished {
+            if let Some(ref mut e) = self.anim {
+                e.finish(&mut self.image);
+            }
             self.anim = None;
+            if self.to_be_killed {
+                return EntityResult::Kill
+            }
+            if self.to_be_hidden {
+                self.visible = false;
+            }
         }
+        EntityResult::Continue
     }
     /// Finishes the animation struct if possible.
     pub fn finish(&mut self) {
@@ -150,6 +166,8 @@ impl Character {
             name,
             offset: self.offset,
             anim: None,
+            to_be_hidden: false,
+            to_be_killed: false,
         })
     }
     /// Adds a state to the character. This can be something like "sad" or "happy"
@@ -161,4 +179,13 @@ impl Character {
         self.offset.x = x;
         self.offset.y = y;
     }
+}
+
+#[derive(PartialEq)]
+/// The result an entity returns when it the update method is called.
+pub enum EntityResult {
+    /// Continue as normal.
+    Continue,
+    /// Kill this Entity.
+    Kill,
 }

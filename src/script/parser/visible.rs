@@ -11,22 +11,37 @@ named!(pub show(CompleteStr) -> ScriptStep,
                 tag!("SHOW"),
                 quote
             ),
-            opt!(
-                ws!(
-                    preceded!(
-                        tag!("~"),
-                        quote
+            pair!(
+                opt!(
+                    ws!(
+                        preceded!(
+                            tag!("~"),
+                            quote
+                        )
+                    )
+                ),
+                opt!(
+                    ws!(
+                        preceded!(
+                            tag!("with"),
+                            quote
+                        )
                     )
                 )
             )
         ),
-        |(image, state)| {
+        |(image, (state, trans))| {
             let state = {
                 if let Some(s) = state {
                     Some(s.to_string())
                 } else {None}
             };
-            ScriptStep::Show(image.to_string(), state)
+            let trans = {
+                if let Some(t) = trans {
+                    Some(t.to_string())
+                } else {None}
+            };
+            ScriptStep::Show(image.to_string(), state, trans)
         }
     )
 );
@@ -35,9 +50,24 @@ named!(pub hide(CompleteStr) -> ScriptStep,
     map!(
         preceded!(
             tag!("HIDE"),
-            quote
+            pair!(
+                quote,
+                opt!(
+                    preceded!(
+                        tag!("with"),
+                        quote
+                    )
+                )
+            )
         ),
-        |image| ScriptStep::Hide(image.to_string())
+        |(image, trans)| {
+            let trans = {
+                if let Some(t) = trans{
+                    Some(t.to_string())
+                } else {None}
+            };
+            ScriptStep::Hide(image.to_string(), trans)
+        }
     )
 );
 

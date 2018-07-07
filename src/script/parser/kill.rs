@@ -8,11 +8,26 @@ named!(pub kill(CompleteStr) -> ScriptStep,
     map!(
         preceded!(
             tag!("KILL"),
-            ws!(
-                quote
+            pair!(
+                quote,
+                opt!(
+                    ws!(
+                        preceded!(
+                            tag!("with"),
+                            quote
+                        )
+                    )
+                )
             )
         ),
-        |entity| ScriptStep::Kill(entity.to_string())
+        |(entity, trans)| {
+            let trans = {
+                if let Some(t) = trans {
+                    Some(t.to_string())
+                } else {None}
+            };
+            ScriptStep::Kill(entity.to_string(), trans)
+        }
     )
 );
 

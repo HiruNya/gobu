@@ -47,13 +47,18 @@ struct AnimationFromFile {
 #[serde(tag = "type", content = "time")]
 enum Transition {
     FadeIn(f32),
+    FadeOut(f32),
 }
 impl Transition {
     fn to_transition(&self) -> Box<dyn CharacterTransition> {
         use self::Transition::*;
-        use super::super::super::animation::premade::FadeIn;
+        use super::super::super::animation::premade::{
+            FadeIn,
+            FadeOut,
+        };
         match *self {
             FadeIn(t) => FadeIn::new(t),
+            FadeOut(t) => FadeOut::new(t),
         }
     }
 }

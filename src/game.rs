@@ -89,6 +89,7 @@ pub struct Game {
     pub music: Option<Music>,
     /// The animations that are displayed in the game like CharacterTransitions.
     pub anims: Animation,
+    garbage: Vec<String>,
 }
 
 impl Game {
@@ -115,6 +116,7 @@ impl Game {
             input: GameInput::new(),
             music: None,
             anims: Animation::new(),
+            garbage: vec![],
         }
     }
     /// Handles a piston event. Currently only going forward in the story is supported.
@@ -149,10 +151,21 @@ impl Game {
             },
             Loop(l) => {
                 use piston_window::Loop;
+                use super::character::EntityResult;
                 match l {
                     Loop::Update(args) => {
-                        for i in self.stage.values_mut() {
-                            i.update(args.dt)
+                        let mut trash_present = false;
+                        for (k, i) in self.stage.iter_mut() {
+                            if EntityResult::Kill == i.update(args.dt) {
+                                self.garbage.push(k.to_string());
+                                trash_present = true;
+                            }
+                        }
+                        if trash_present {
+                            for i in self.garbage.iter() {
+                                self.stage.remove(i);
+                            }
+                            self.garbage.clear();
                         }
                     },
                     _ => {},

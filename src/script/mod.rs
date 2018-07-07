@@ -33,16 +33,18 @@ pub enum ScriptStep {
     DialogueContinue(String),
     /// Shows an entity on the screen and if the state is not ``None`` will change that
     /// entity's state to the state named.
-    /// (Entity, Some(State))
-    Show(String, Option<String>), // Show(Entity, State)
+    /// (Entity, Some(State), Some(Transition)
+    Show(String, Option<String>, Option<String>), // Show(Entity, State)
     /// Hides an entity using its name
-    Hide(String),
+    /// (Entity, Some(Transition)
+    Hide(String, Option<String>),
     /// Spawns a character with a specific entity name and also possibly a position.
     /// The last element is a transition that can be used.
     /// (CharacterName, Some(EntityName), Some(Position), Some(TransitionName))
     Spawn(String, Option<String>, Option<(f64, f64)>, Option<String>),
     /// Kill an entity
-    Kill(String),
+    /// (Entity, Some(Transition))
+    Kill(String, Option<String>),
     /// Move an entity to a specific position
     Move(String, (f64, f64)),
     /// Set the background
@@ -186,18 +188,29 @@ impl Game {
                 self.ui.textbox.set_text(content.clone());
                 false
             },
-            Show(image, possible_state) => {
+            Show(image, possible_state, trans) => {
                 if let Some(e) = self.stage.get_mut(&image) {
-                    e.visible = true;
+                    e.set_visible(true);
                 }
                 if let Some(state) = possible_state {
                     self.change_entity_state(&image, &state);
                 }
+                if let Some(t) = trans {
+                    self.apply_character_transition(&image, &t);
+                }
                 true
             },
-            Hide(image) => {
+            Hide(image, trans) => {
+                let mut vis = false;
+                if let Some(t) = trans {
+                    self.apply_character_transition(&image, &t);
+                    if let Some(e) = self.stage.get_mut(&image) {
+                        e.to_be_hidden = true;
+                    }
+                    vis = true;
+                }
                 if let Some(e) = self.stage.get_mut(&image) {
-                    e.visible = false;
+                    e.visible = vis;
                 }
                 true
             },
@@ -212,8 +225,18 @@ impl Game {
                 }
                 true
             },
-            Kill(name) => {
-                self.stage.remove(&name);
+            Kill(name, trans) => {
+                let mut rem = true;
+                if let Some(t) = trans {
+                    self.apply_character_transition(&name, &t);
+                    if let Some(e) = self.stage.get_mut(&name) {
+                        e.to_be_killed = true;
+                    }
+                    rem = false;
+                }
+                if rem {
+                    self.stage.remove(&name);
+                }
                 true
             },
             Move(name, pos) => {
